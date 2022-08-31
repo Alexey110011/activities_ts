@@ -22,6 +22,15 @@ app.get('/m', (req, res) => {
     res.status(500).send(error);
   })})
 
+app.get('/cleardb', (req,res)=>{
+  merchant_model.clearDatabase()
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })})
+
   app.post('/times', (req, res) => {
       merchant_model.getTimeData(req.body)
       .then(response => {

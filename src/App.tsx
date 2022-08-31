@@ -45,6 +45,7 @@ const App=() =>{
     const [rangeAmount, setRangeAmount] = useState(false)
     const [rangeDate, setRangeDate] = useState(false)
     const [serverActivated, setServerActivated] = useState(false)
+    const [dataBaseInfo, setDatabaseInfo] = useState('data from file shown')
   
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>
@@ -129,6 +130,19 @@ const App=() =>{
       }
     }
 
+  function clearDatabase(){
+    fetch('/cleardb')
+    .then(response => {
+          return response.text();
+        })
+        .then(data => {
+          //const id1= JSON.parse(data)
+          //const id = toLocale(id1)
+          setDatabaseInfo(data);
+          console.log(data)
+        });
+    }
+
     function getServerData(){
       if(serverActivated){
         getContragents()
@@ -197,6 +211,7 @@ const App=() =>{
               Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
               date<input type = "checkbox" onChange={rangeByDate}></input>
               Activate server<input type = 'checkbox' onChange = {startServer}></input>
+              Clear database<input type = 'checkbox' onChange = {clearDatabase}></input>{dataBaseInfo}
           </div>
           <Date cref = {calRef} sref = {selectRef1}/>
           <Routes>

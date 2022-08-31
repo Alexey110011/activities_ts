@@ -1,5 +1,4 @@
 import React, {useRef, useState} from 'react'
-import { StringLiteralLike } from 'typescript'
 
 type newData = {
     _id: string;
@@ -72,7 +71,7 @@ type newData = {
     }
 
       interface Transaction1 {
-        data:newData[],
+        data:newData[]|undefined,
       }
 
 
@@ -90,14 +89,6 @@ function removeDoubleFirst(array:newData[]){
          array[i].amount = 0
          }
     } 
-}
-
-function removeDoubleName(array:newData[]) {
-    for (let i=0;i<array.length-1;i++){
-        if(array[i].fullname===array[i+1].fullname){
-           array[i].amount =0
-       }
-    }
 }
 
 function removeDoubleNameSum(array:oldData[]) {
@@ -140,7 +131,7 @@ function updateContragent(e:React.ChangeEvent<HTMLTextAreaElement>,_id:string){
     .then(response=> {
       return response.text()
    }).then(data=>{
-    alert (data);
+    console.log(data);
    });
 }
 
@@ -154,10 +145,11 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color}:Acti
         const someData = _someData.filter(item=>item.amount!==0)
         const maxVal = getMaxValue(someData)
         const perPixel = maxVal/400
+        const totalAmount = someData.map(item=>item.amount).reduce(getSum,0)
         if(!rangeAmount&&!rangeDate){
             return(
                 <div className = "wrapper">
-                    <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type}</h3></div>
+                    <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
                    {someData.map((item:newData,i:number)=>
                     <li className = "activity" key = {i} >
                         <div>{item.fullname}</div>
@@ -202,7 +194,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color}:Acti
 
 const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)=>{   
     const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
-    if(somearray&&activity) {
+    if(somearray&&activity&&someref.current.value!=='') {
        return(
             <div>
                 <div style = {{textTransform:"capitalize"}}>{type}:{activity}</div>
@@ -359,7 +351,6 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
             )
         }
     }
-
     return(
       <div>
             <ul className = "summary">
@@ -385,7 +376,6 @@ export const Transaction=({data}:Transaction1)=>{
     const qRef = useRef()as React.MutableRefObject<HTMLTextAreaElement>
   
    const [l, setL]= useState<string>('')
-   const [f, setF] = useState<string>('')
    const [viewLast,setViewLast]= useState(false)
    const [viewFirst,setViewFirst]= useState(false)
    const [viewInfo, setViewInfo] = useState(true)
@@ -451,7 +441,6 @@ export const Transaction=({data}:Transaction1)=>{
   
    const firstname = (e:React.ChangeEvent<HTMLInputElement>)=>{
     const f1 = e.target.value
-    setF(f1)
     const fn = new RegExp(f1)
     if(firstName&&firstName.length!==0){
       for (let i of firstName){
@@ -467,18 +456,12 @@ export const Transaction=({data}:Transaction1)=>{
         const firstName1 = data.filter(item=>item.fullname.split(/\s/)[0]===lnRef.current.value).sort((a,b)=>(a.fullname.split(/]s/)[1] > b.fullname.split(/\s/)[1]) ? 1 :((b.fullname.split(/\s/)[1] > a.fullname.split(/\s/)[1]) ? -1: 0))
         removeDoubleFirst(firstName1)
         firstName = firstName1.filter(item=>item.amount!==0)
-        
-        for (let i of data) {
-            if (i.fullname.split(/\s/)[0]===lnRef.current.value&&i.fullname.split(/\s/)[1]===fnRef.current.value){
-            mailRef.current.value = i.email;
-            numRef.current.value = i.phone;
-            adRef.current.value = i.address;
-            } 
-        }
+       
+       
 
        const onClickLast = (_id:string) =>{
        const name1 = lastName.filter(item=>item._id===_id)
-       lnRef.current.value=name1[0].fullname.split(/\s/)[0]
+       lnRef.current.value = name1[0].fullname.split(/\s/)[0]
        setViewFirst(true)
        setViewLast(false)
        firstName = lastName.filter(item=>lnRef.current.value===item.fullname.split(/\s/)[0])
@@ -488,14 +471,18 @@ export const Transaction=({data}:Transaction1)=>{
   
     const onClickFirst = (_id:string) =>{
         const name1 = firstName.filter(item=>item._id===_id)
-        fnRef.current.value=name1[0].fullname.split(/\s/)[1]
+        fnRef.current.value = name1[0].fullname.split(/\s/)[1]
         setViewFirst(false)
-        if(lnRef.current.value!==null&&fnRef.current.value!==null){
-          const newData = data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
-                          .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))
-                          const newData1 = newData.slice(2,1)
-                          setCheckbox(true)
-        }
+        const latestData0= data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
+        .filter(item=>item.date<=dateRef.current.value)
+        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))
+        const latestData = latestData0[latestData0.length-1]
+        console.log(latestData0.length,latestData)
+        mailRef.current.value = latestData.email;
+        numRef.current.value = latestData.phone;
+        adRef.current.value = latestData.address;
+        setCheckbox(true)
+        setViewInfo(false)
     }
         
       return(
@@ -534,6 +521,39 @@ export const Transaction=({data}:Transaction1)=>{
               </div>
             </form>
         </div>
-      )
-    } else {return null}
-} 
+      )} else {return(
+        <div>
+            <form className = "form" onSubmit ={submit} autoComplete = "off">  
+              <div className="form-zvonok"> 
+                <label>Transaction <span>*</span></label>
+                <select name='transactiontype' ref ={trRef}>
+                    <option>Income</option>
+                    <option>Outcome</option>
+                    <option>Loan</option>
+                    <option>Investment</option>
+                </select>
+                <label>Date <span>*</span></label>
+                <input type='date' name='date' ref = {dateRef} required/>
+                <label>Last name <span>*</span></label>
+                <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/>
+                <label>First name <span>*</span></label>
+                <input type='text' name='userfirstname' ref = {fnRef} onChange ={firstname} required/>
+                <label>Amount <span>*</span></label>
+                <input type='number' name='amount' ref = {amRef} required/>
+                {<div className = {(!checkbox)?"cached":"visiblement_ info" }><label>Change personal data</label><input type = "checkbox"  onChange = {()=>setViewInfo(!viewInfo)}></input></div>}
+                    <div className = {(viewInfo)?"info":"noinfo"}>
+                        <label>E-mail <span>*</span></label>
+                        <input type='text' name='usermail' ref = {mailRef}/>
+                        <label>Phone <span>*</span></label>
+                        <input type='text' name='usernumber' ref = {numRef}/>
+                        <label>Address <span>*</span></label>
+                        <input type='text' name='address'ref = {adRef}/>
+                        <label>Notes</label>
+                    </div>
+                <textarea className = "text" name='question' ref = {qRef}/>
+                <input className="bot-send-mail" type='submit' value='Send'/>
+              </div>
+            </form>
+        </div>)
+    } 
+}

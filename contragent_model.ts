@@ -84,8 +84,20 @@ const pool = new Pool({
       })
     }
 
+      const clearDatabase = () =>{
+        return new Promise(function(resolve, reject) {
+          pool.query('DELETE FROM contragents', (error, results) => {
+            if (error) {
+              reject(error)
+            }
+            resolve("Cleared"/*ults.rows*/);
+          })
+        }) 
+      }
+
   module.exports = {
     getContragents,
     getTimeData,
     createContragent,
-    updateContragent}
+    updateContragent, 
+    clearDatabase}

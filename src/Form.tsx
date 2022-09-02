@@ -1,4 +1,5 @@
 import React, {useRef, useState} from 'react'
+import {v4} from 'uuid'
 
 type newData = {
     _id: string;
@@ -406,7 +407,7 @@ export const Transaction=({data}:Transaction1)=>{
         "Content-type": "application/json; charset=UTF-8"
         },
       body:JSON.stringify({
-        _id: Math.floor(Math.random()*1000),
+        _id: v4(),
         fullname:`${lnRef.current.value} ${fnRef.current.value}`,
         date:dateRef.current.value,
         type:trRef.current.value.toLowerCase(),

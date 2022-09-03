@@ -30,7 +30,6 @@
       "react-app/jest"
     ]
   },
-  "proxy": "https://activities-server-db.herokuapp.com",
   "browserslist": {
     "production": [
       ">0.2%",

@@ -81,7 +81,7 @@ const App=() =>{
     }
 
     function getContragents() {
-      fetch('/m')
+      fetch('https://activities-server-db.herokuapp.com/m')
         .then(response => {
           return response.text();
         })

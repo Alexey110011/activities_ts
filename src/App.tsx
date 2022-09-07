@@ -53,7 +53,6 @@ const App=() =>{
     const [rangeDate, setRangeDate] = useState(false)
     const [serverActivated, setServerActivated] = useState(false)
     const [info_modal,setInfo_modal] = useState(false)
-    const loaderRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>

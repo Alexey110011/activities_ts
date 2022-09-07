@@ -22,16 +22,23 @@ export type newData = {
   sref:React.MutableRefObject<HTMLSelectElement>,
  }
 
+ type Modal = {
+  serverActivated:boolean
+ }
+
   function toLocale(array:newData[]):newData[] {
     for(let i of array){
       i.date = new Date(i.date).toLocaleDateString()
       i.date = i.date.split(/\./).reverse().join('-')
-      console.log(i.date)}
+      console.log(i.date)
+      i.amount=Number(i.amount)}
     const sortedArray = array.sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
     return sortedArray
     }
   const data1:newData[] = structuredClone(dataFromFile.data)
   console.log(dataFromFile, data1)
+  
+  
 
 const App=() =>{
    
@@ -45,8 +52,9 @@ const App=() =>{
     const [rangeAmount, setRangeAmount] = useState(false)
     const [rangeDate, setRangeDate] = useState(false)
     const [serverActivated, setServerActivated] = useState(false)
-    const [dataBaseInfo, setDatabaseInfo] = useState('data from file shown')
-  
+    const [info_modal,setInfo_modal] = useState(false)
+    const loaderRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const modalRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>
 
@@ -75,30 +83,55 @@ const App=() =>{
     const Date=({cref, sref}:Date)=>{
       if(selectRef1.current&&calRef.current.value!==''){
           return(
-          <h3>Data {selectRef1.current.value} {calRef.current.value} shown</h3>
+          <h3 style={{margin:"20px 20% 0 20%"}}>Data {selectRef1.current.value} {calRef.current.value} shown</h3>
       )
       } else {return null}
     }
 
+    const Modal =({serverActivated}:Modal)=>{
+      if(!serverActivated){
+        return(
+          <div ref = {modalRef} className = {(!info_modal)?"modal":"modal_hidden"}>
+            <div className = "alert">
+              Behind you see data from local json file. <br/>
+              If you want to manage your own data,
+              you may "Activate server" and begin to work with them.
+              <button className = "modal_btn" onClick = {hideModal}>X</button>  </div>
+          </div>)
+      } else {
+          return( 
+          <div ref = {modalRef} className = {(!info_modal)?"modal":"modal_hidden"}>
+          <div className = "alert">
+            At the moment database may countain data of other users. <br/>
+            You may use or add them or "Clear database" and work from scratch.
+            <button className = "modal_btn" onClick = {hideModal}>X</button>  </div>
+        </div>)}
+    }
+
+   function hideModal(){
+    setInfo_modal(true)
+    }
+
     function getContragents() {
-      fetch('https://activities-server-db.herokuapp.com/m')
+        fetch('https://activities-server-db.herokuapp.com/m')
         .then(response => {
           return response.text();
         })
         .then(data => {
+          setInfo_modal(!info_modal)
           const id1= JSON.parse(data)
           const id = toLocale(id1)
           setData(id);
           console.log(data)
-        });
-    }
-
+         })
+      }
+ 
     function getTimes() {
       const date = calRef.current.value
       const sign = selectRef1.current.value
       console.log(calRef.current.value)
       if(calRef.current.value){     
-        fetch('/times',  {
+        fetch('https://activities-server-db.herokuapp.com/times',  {
           method: 'POST',
           headers: {
           'Content-Type': 'application/json',
@@ -122,23 +155,23 @@ const App=() =>{
         }
 
     function startServer(){
-      setServerActivated(!serverActivated)
+     setServerActivated(!serverActivated)
+     setInfo_modal(!info_modal)
       if(!calRef.current.value){
         getContragents()
+       
       } else {
         getTimes()
       }
     }
 
   function clearDatabase(){
-    fetch('/cleardb')
+    fetch('https://activities-server-db.herokuapp.com/cleardb')
     .then(response => {
           return response.text();
         })
         .then(data => {
-          //const id1= JSON.parse(data)
-          //const id = toLocale(id1)
-          setDatabaseInfo(data);
+        
           console.log(data)
         });
     }
@@ -185,7 +218,8 @@ const App=() =>{
       }
     }
   return(
-        <div className ="wrapper1"> 
+      <div className ="wrapper1"> 
+        <Modal serverActivated = {serverActivated}/>
           <div className = "tablo" onClick = {getServerData}>
               <nav className = "navpanel">
                   <ul> 
@@ -208,10 +242,12 @@ const App=() =>{
                 <option>From</option>
                 <option>After</option>
               </select> 
-              Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
+               Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
               date<input type = "checkbox" onChange={rangeByDate}></input>
-              Activate server<input type = 'checkbox' onChange = {startServer}></input>
-              Clear database<input type = 'checkbox' onChange = {clearDatabase}></input>{dataBaseInfo}
+              <ul style = {{listStyleType:"none",position : "absolute", bottom: "535px",left:"500px"}}>
+                <li><input style = {{backgroundColor:"lightBlue", border: "none"}} type = 'checkbox' onChange = {startServer}></input>Activate server</li>
+                <li><input type = 'checkbox' onChange = {clearDatabase}></input>Clear database</li>
+              </ul>
           </div>
           <Date cref = {calRef} sref = {selectRef1}/>
           <Routes>
@@ -219,7 +255,7 @@ const App=() =>{
               <Route path = "/tab=1" element ={<Activity someactivity = {sumOutcome} type = "Outcome" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="steelBlue"/>}/>
               <Route path = "/tab=2" element ={<Activity someactivity = {sumLoan} type = "Loan" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "yellow"/>} />
               <Route path = "/tab=3" element ={<Activity someactivity = {sumInvest} type  = "Investment"rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "lightgreen"/>}/>
-              <Route path = "/tab=4" element ={<Contragent data = {data} server = {serverActivated} 
+              <Route path = "/tab=4" element ={<Contragent data = {data} serverActivated = {serverActivated} 
                                                                         sumincome = {sumIncome}
                                                                         sumoutcome = {sumOutcome}
                                                                         sumloans = {sumLoan}
@@ -230,7 +266,7 @@ const App=() =>{
                                                                  suminvest = {sumInvest}/>}/>
               <Route path = "/tab=5" element ={<Transaction data={data}/>}/>
           </Routes> 
-        </div>
+      </div>
       )
     }
 

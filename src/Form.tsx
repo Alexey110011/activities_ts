@@ -35,7 +35,7 @@ type newData = {
       question?:string
       }
       
-      interface Activity1 {
+    interface Activity1 {
         someactivity:newData[]|undefined,
         type:string,
         rangeAmount:boolean,
@@ -56,7 +56,7 @@ type newData = {
         sumoutcome:newData[]|undefined,
         sumloans:newData[]|undefined,
         suminvest:newData[]|undefined,
-        server:boolean 
+        serverActivated:boolean 
       }
 
       interface Summary1 {
@@ -79,7 +79,9 @@ type newData = {
 function removeDoubleLast (array:newData[]){
     for (let i=0;i<array.length-1;i++) {
         if(array[i].fullname.split(/\s/)[0]===array[i+1].fullname.split(/\s/)[0]){
-           array[i].amount=0 
+           array[i].amount=0 ;
+           /*const clean = array.filter(item=>item.amount!==0)
+           return clean*/
         }
     } 
 } 
@@ -88,6 +90,8 @@ function removeDoubleFirst(array:newData[]){
     for (let i=0;i<array.length-1;i++) {
         if(array[i].fullname.split(/\s/)[1]===array[i+1].fullname.split(/\s/)[1]){
          array[i].amount = 0
+         /*const clean = array.filter(item=>item.amount!==0)
+         return clean*/
          }
     } 
 }
@@ -96,7 +100,9 @@ function removeDoubleNameSum(array:oldData[]) {
     for (let i=0;i<array.length-1;i++){
         if(array[i].fullname===array[i+1].fullname){
             array[i+1].amount =array[i+1].amount + array[i].amount
-            array[i].amount = 0
+            array[i].amount = 0;
+            /*const clean = array.filter(item=>item.amount!==0)
+            return clean*/
         }
     }
 }
@@ -106,6 +112,8 @@ function removeDoubleDateSum(array:newData[]){
         if(array[i].date===array[i+1].date){
             array[i+1].amount = array[i].amount + array[i+1].amount
             array[i].amount = 0
+            /*const clean = array.filter(item=>item.amount!==0)
+            return clean*/
         }
     }
 }
@@ -122,7 +130,7 @@ function getSum(total:number, number:number):number{
    return total+number}
    
 function updateContragent(e:React.ChangeEvent<HTMLTextAreaElement>,_id:string){
-     fetch('/merchants/update', {
+     fetch('https://activities-server-db.herokuapp.com/merchants/update', {
       method: "PUT",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
@@ -204,8 +212,8 @@ const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)
                         .filter(item=>item.type===`${type}`)
                         .sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
                         .map((item, i)=>
-                            <li key = {i}>
-                                {item.date}:{item.amount}
+                            <li className = "showcontragent" key = {i} style ={{display:"grid", gridTemplateColumns: "1fr 1fr 1fr"}}>
+                                {item.date} : {item.amount}
                                 <textarea style ={{position:"relative", top:"10px", left:"10px"}} 
                                         defaultValue = {item.question} 
                                         onMouseOver= {()=>noteRef.current.className = "comments1" } 
@@ -221,7 +229,7 @@ const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)
     } else {return null}
 }
 
-export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest}:Contragent1)=>{
+export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, serverActivated}:Contragent1)=>{
     const [sumIncome0, setSumIncome0] = useState<number|null>()
     const [sumOutcome0, setSumOutcome0] = useState<number|null>()
     const [sumLoans0, setSumLoans0] = useState<number|null>()
@@ -233,16 +241,15 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest}:Con
     function changeInput(e:React.ChangeEvent<HTMLInputElement>) {
         const reg1= e.target.value
         setReg(reg1)
-        console.log(reg)
+        //console.log(reg)
     }
     const n = new RegExp(reg)
 
     function getPersonal(someData:newData[]|undefined,selectref:React.MutableRefObject<HTMLInputElement>):number|null{
-        
         return (someData&&someData.length!==0)?someData.filter(item=>item.fullname === selectref.current.value)
                                                        .map(item=>item.amount)
                                                        .reduce(getSum,0)
-                                               :null
+                                                       :null
     }
 
     function showContragent(){
@@ -250,7 +257,7 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest}:Con
         const outcomes = getPersonal(sumoutcome,selectRef)
         const loans =  getPersonal(sumloans,selectRef)
         const investments = getPersonal(suminvest, selectRef)
-        console.log(incomes,outcomes,loans, investments)
+        //console.log(incomes,outcomes,loans, investments)
         setSumIncome0(incomes)
         setSumOutcome0(outcomes)
         setSumLoans0(loans)
@@ -306,10 +313,11 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
             const summ = array.map(item=>(item.amount)).reduce(getSum,0)
             console.log(summ)
             return summ
-    } else {return null}
-}
-   const uu:(number|null)[] = [sumincome,sumoutcome, sumloans,suminvest].map(item=>getEveryAmount(item))
-      console.log(uu)
+        } else {return null}
+    }
+
+    const uu:(number|null)[] = [sumincome,sumoutcome, sumloans,suminvest].map(item=>getEveryAmount(item))
+        console.log(uu)
     
     function gmv1(array:(number|null)[]){
         let maxVal:number|null;
@@ -320,8 +328,9 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
                     return prop}
                 else {
                     return max}
-            } else {
-            return prop}},0)
+            } else if(!prop&&max){
+                return max}
+              else { return prop}},0)
             return maxVal
         }
     }    
@@ -385,10 +394,6 @@ export const Transaction=({data}:Transaction1)=>{
   const submit=(e:React.ChangeEvent<HTMLFormElement>)=>{
     e.preventDefault()
     createContragent()
-    .then(res =>{
-    console.log(res)
-    })
-    .catch(err =>console.log(err))
     lnRef.current.value=''
     fnRef.current.value=''
     amRef.current.value=''
@@ -399,9 +404,34 @@ export const Transaction=({data}:Transaction1)=>{
     dateRef.current.value=''
     qRef.current.value = ''
     } 
-    
-  async function createContragent(){
-    const response = await fetch('/contragents', {
+
+    function createContragent(){
+    fetch('https://activities-server-db.herokuapp.com/contragents',{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",/*; charset=UTF-8",*/ 
+      },
+    body:JSON.stringify({
+      _id: v4(),
+      fullname:`${lnRef.current.value} ${fnRef.current.value}`,
+      date:dateRef.current.value,
+      type:trRef.current.value.toLowerCase(),
+      amount:amRef.current.value,
+      email: mailRef.current.value,
+      phone:numRef.current.value,
+      address:adRef.current.value,
+      question:qRef.current.value
+      })
+  })
+    .then(response => {
+          return response.text();
+        })
+        .then(data => {
+          console.log(data)
+        }).catch(err =>console.log(err));
+    }
+ /* async function createContragent(){
+    const response = await fetch('https://activities-server-db.herokuapp.com/contragents', {
       method: "POST",
       headers: {
         "Content-type": "application/json; charset=UTF-8"
@@ -418,12 +448,12 @@ export const Transaction=({data}:Transaction1)=>{
         question:qRef.current.value
         })
     })
-    const body = await response.json()
+      const body = await response.json()
     if (response.status !== 200) {
       throw Error(body.message) 
     }
     return body;
-  };
+  };*/
   
   let  lastName:newData[],firstName:newData[];
     const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
@@ -458,8 +488,6 @@ export const Transaction=({data}:Transaction1)=>{
         removeDoubleFirst(firstName1)
         firstName = firstName1.filter(item=>item.amount!==0)
        
-       
-
        const onClickLast = (_id:string) =>{
        const name1 = lastName.filter(item=>item._id===_id)
        lnRef.current.value = name1[0].fullname.split(/\s/)[0]

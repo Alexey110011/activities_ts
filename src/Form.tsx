@@ -409,7 +409,7 @@ export const Transaction=({data}:Transaction1)=>{
     fetch('https://activities-server-db.herokuapp.com/contragents',{
     method: "POST",
     headers: {
-      "Content-Type": ["application/json", "charset=UTF-8"]
+      "Content-Type": "application/json"
       },
     body:JSON.stringify({
       _id: v4(),

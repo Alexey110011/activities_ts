@@ -99,6 +99,17 @@
       "phone": "+1 (954) 566-2476",
       "address": "457 St",
       "date":"2022-08-07"
+    },
+    {
+      "_id": "5d99beb69a6aac64be820dbel",
+      "amount": 1000,
+      "type": "outcome",
+      "fullname":"Owens Francis",
+      "company": "EXOPLODE",
+      "email": "francis.owens@exoplode.us",
+      "phone": "+1 (954) 566-2476",
+      "address": "457 St",
+      "date":"2022-08-07"
     }
   ]
 }

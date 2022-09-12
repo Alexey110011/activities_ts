@@ -1,5 +1,6 @@
 import React, {useRef, useState} from 'react'
 import {v4} from 'uuid'
+import {Date1} from './App'
 
 type newData = {
     _id: string;
@@ -16,7 +17,7 @@ type newData = {
     address:string;
     date:string;
     question?:string
-  }
+}
   
     type oldData = {
       _id: string;
@@ -40,7 +41,9 @@ type newData = {
         type:string,
         rangeAmount:boolean,
         rangeDate:boolean,
-        color:string
+        color:string,
+        cref:React.MutableRefObject<HTMLInputElement>,
+        sref:React.MutableRefObject<HTMLSelectElement> 
     }
 
     interface PersonalActivity1 {
@@ -48,16 +51,20 @@ type newData = {
         activity:number|null|undefined,
         somearray:newData[]|undefined,
         someref:React.MutableRefObject<HTMLInputElement>,
+        color:string,
+        dateActivated:boolean
     }
 
     interface Contragent1 {
         data:newData[]|undefined,
+        dateData:newData[]|undefined,
         sumincome:newData[]|undefined,
         sumoutcome:newData[]|undefined,
         sumloans:newData[]|undefined,
         suminvest:newData[]|undefined,
-        serverActivated:boolean 
-      }
+        serverActivated:boolean,
+        dateActivated:boolean
+    }
 
       interface Summary1 {
         data:newData[]|undefined,
@@ -65,44 +72,25 @@ type newData = {
         sumoutcome:newData[]|undefined,
         sumloans:newData[]|undefined,
         suminvest:newData[]|undefined,
+        cref:React.MutableRefObject<HTMLInputElement>,
+        sref:React.MutableRefObject<HTMLSelectElement>,
     }
       interface getSummary {
         someData:newData[]|undefined,
-        trans:string
+        trans:string,
+        color:string
     }
 
       interface Transaction1 {
         data:newData[]|undefined,
       }
 
-
-function removeDoubleLast (array:newData[]){
-    for (let i=0;i<array.length-1;i++) {
-        if(array[i].fullname.split(/\s/)[0]===array[i+1].fullname.split(/\s/)[0]){
-           array[i].amount=0 ;
-           /*const clean = array.filter(item=>item.amount!==0)
-           return clean*/
-        }
-    } 
-} 
-
-function removeDoubleFirst(array:newData[]){
-    for (let i=0;i<array.length-1;i++) {
-        if(array[i].fullname.split(/\s/)[1]===array[i+1].fullname.split(/\s/)[1]){
-         array[i].amount = 0
-         /*const clean = array.filter(item=>item.amount!==0)
-         return clean*/
-         }
-    } 
-}
-
+// Removes duplicates from array
 function removeDoubleNameSum(array:oldData[]) {
     for (let i=0;i<array.length-1;i++){
         if(array[i].fullname===array[i+1].fullname){
             array[i+1].amount =array[i+1].amount + array[i].amount
             array[i].amount = 0;
-            /*const clean = array.filter(item=>item.amount!==0)
-            return clean*/
         }
     }
 }
@@ -112,12 +100,11 @@ function removeDoubleDateSum(array:newData[]){
         if(array[i].date===array[i+1].date){
             array[i+1].amount = array[i].amount + array[i+1].amount
             array[i].amount = 0
-            /*const clean = array.filter(item=>item.amount!==0)
-            return clean*/
         }
     }
 }
 
+// Retrieving max value of array
 function getMaxValue(array:newData[]){
     const maxVal = array.map(item=>item.amount).reduce((max, prop)=>{
     if(prop>max){return prop}
@@ -126,6 +113,7 @@ function getMaxValue(array:newData[]){
     return maxVal
 }
 
+// Getting sum of all array elements
 function getSum(total:number, number:number):number{
    return total+number}
    
@@ -144,7 +132,7 @@ function updateContragent(e:React.ChangeEvent<HTMLTextAreaElement>,_id:string){
    });
 }
 
-export const Activity = ({someactivity, type, rangeAmount, rangeDate,color}:Activity1)=>{
+export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref, sref}:Activity1)=>{
     if(someactivity){
         const _someData:newData[] = structuredClone(someactivity)
         .sort((a:newData,b:newData)=> (a.fullname>b.fullname)?1:((a.fullname<b.fullname)?-1:0))
@@ -153,83 +141,86 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color}:Acti
         }
         const someData = _someData.filter(item=>item.amount!==0)
         const maxVal = getMaxValue(someData)
-        const perPixel = maxVal/400
+        const perPixel = maxVal/320
         const totalAmount = someData.map(item=>item.amount).reduce(getSum,0)
         if(!rangeAmount&&!rangeDate){
             return(
-                <div className = "wrapper">
-                    <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
+            <div>
+                <Date1 cref = {cref} sref  ={sref}/>
+                <div className = "activity_wrapper">
+                    <div className = "activity_info" style = {{borderBottom:`2px solid ${color}`}}><h3>{type} {totalAmount}</h3></div>
                    {someData.map((item:newData,i:number)=>
                     <li className = "activity" key = {i} >
-                        <div>{item.fullname}</div>
-                        <div>{item.amount}</div>
-                        <div style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
+                        <div className = "fullname"> {item.fullname}</div>
+                        <div className = "amount1">{item.amount}</div>
+                        <div className ="rectangle" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
                     </li>)}
                 </div>
+            </div>
             )
         }
         else 
         if(rangeAmount&&!rangeDate){
             return(
-                <div className="wrapper">
-                    <div style = {{borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type}</h3></div> 
+                <div className="activity_wrapper">
+                     <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.amount<b.amount)?1:(a.amount>b.amount)?-1:0)//))  
                     .map((item,i)=>
                     <li className = "activity" key = {i} >
-                        <div>{item.fullname}</div>
-                        <div>{item.amount}</div>
-                        <div style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
+                        <div className ="fullname">{item.fullname}</div>
+                        <div className = "amount1">{item.amount}</div>
+                        <div className = "rectangler" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
                     </li>)}
                </div>)
         }
         else 
         if(!rangeAmount&&rangeDate){
             return(
-                <div className = "wrapper">
-                    <div style = {{borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type}</h3></div>
+                <div className = "activity_wrapper">
+                    <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
                     .map((item,i)=>
                     <li className="activity"  key = {i} >
-                        <div>{item.date} </div>
-                        <div>{item.amount}</div>
-                        <div style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
+                        <div className = "fullname">{item.date} </div>
+                        <div className = "amount1">{item.amount}</div>
+                        <div className = "rectangle" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
                     </li>)}
                 </div>)
         } else {return null}
     } else {return null} 
 }
 
-const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)=>{   
+const PersonalActivity = ({type, activity, somearray,someref, color, dateActivated}:PersonalActivity1)=>{   
     const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
     if(somearray&&activity&&someref.current.value!=='') {
        return(
             <div>
-                <div style = {{textTransform:"capitalize"}}>{type}:{activity}</div>
-                {(somearray&&somearray.length!==0)?
-                somearray.filter(item=>`${item.fullname}`===someref.current.value)
-                        .filter(item=>item.type===`${type}`)
-                        .sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
-                        .map((item, i)=>
-                            <li className = "showcontragent" key = {i} style ={{display:"grid", gridTemplateColumns: "1fr 1fr 1fr"}}>
-                                {item.date} : {item.amount}
-                                <textarea style ={{position:"relative", top:"10px", left:"10px"}} 
-                                        defaultValue = {item.question} 
-                                        onMouseOver= {()=>noteRef.current.className = "comments1" } 
-                                        onClick = {()=>noteRef.current.className = "comments"} 
-                                        onMouseLeave={()=>noteRef.current.className = "comments" }
-                                        onBlur = {(e)=>updateContragent(e,item._id)}>
-                                </textarea>
-                                <span ref = {noteRef} className = "comments">Change note?</span>
-                            </li>)
-                :null}
-            </div>
-        )
-    } else {return null}
-}
+                <ul className={(type==="income")?"red":(type=== "outcome")?"steelblue":(type ==="loan")?"yellow":"green"}>
+                        {(somearray&&somearray.length!==0)? somearray
+                            .filter(item=>`${item.fullname}`===someref.current.value)
+                            .filter(item=>item.type===`${type}`)
+                            .sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
+                            .map((item, i)=>
+                                <li className = "showcontragent" key = {i}>
+                                   {item.date} : {item.amount}
+                                   <textarea style ={{position:"relative", top:"10px"}} 
+                                             defaultValue = {item.question} 
+                                             onMouseOver= {()=>noteRef.current.className = "comments1" } 
+                                             onClick = {()=>noteRef.current.className = "comments"} 
+                                             onMouseLeave={()=>noteRef.current.className = "comments" }
+                                             onBlur = {(e)=>updateContragent(e,item._id)}>
+                                   </textarea>
+                                            <span ref = {noteRef} className = "comments">Change note?</span>
+                                </li>)
+                            :null} 
+                        </ul>
+                   </div>)
+        } else {return null}
+    }
 
-export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, serverActivated}:Contragent1)=>{
+export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, suminvest, dateActivated}:Contragent1)=>{
     const [sumIncome0, setSumIncome0] = useState<number|null>()
     const [sumOutcome0, setSumOutcome0] = useState<number|null>()
     const [sumLoans0, setSumLoans0] = useState<number|null>()
@@ -241,15 +232,15 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, ser
     function changeInput(e:React.ChangeEvent<HTMLInputElement>) {
         const reg1= e.target.value
         setReg(reg1)
-        //console.log(reg)
-    }
+        }
     const n = new RegExp(reg)
 
     function getPersonal(someData:newData[]|undefined,selectref:React.MutableRefObject<HTMLInputElement>):number|null{
-        return (someData&&someData.length!==0)?someData.filter(item=>item.fullname === selectref.current.value)
-                                                       .map(item=>item.amount)
-                                                       .reduce(getSum,0)
-                                                       :null
+        return (someData&&someData.length!==0)?someData
+        .filter(item=>item.fullname === selectref.current.value)
+        .map(item=>item.amount)
+        .reduce(getSum,0)
+        :null
     }
 
     function showContragent(){
@@ -257,7 +248,6 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, ser
         const outcomes = getPersonal(sumoutcome,selectRef)
         const loans =  getPersonal(sumloans,selectRef)
         const investments = getPersonal(suminvest, selectRef)
-        //console.log(incomes,outcomes,loans, investments)
         setSumIncome0(incomes)
         setSumOutcome0(outcomes)
         setSumLoans0(loans)
@@ -266,7 +256,7 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, ser
 
     if(data){
         let _someData:newData[]
-        _someData = structuredClone(data).sort((a:newData,b:newData)=>(a.fullname>b.fullname)?1:((a.fullname<b.fullname)?-1:0))
+        _someData = structuredClone((!dateActivated)?data:dateData).sort((a:newData,b:newData)=>(a.fullname>b.fullname)?1:((a.fullname<b.fullname)?-1:0))
         removeDoubleNameSum(_someData)
         const list = _someData.filter(item=>item.amount!==0)
 
@@ -279,34 +269,35 @@ export const Contragent =({data, sumincome, sumoutcome, sumloans, suminvest, ser
 
         if(!selectRef.current){
             return (
-                <div className = "wrapper">
+                <div className = "contragent_wrapper">
                    <input ref = {selectRef} onChange = {changeInput}></input>
                     {list.map((item,i)=>
-                        <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)}
+                        <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)} /*onMouseOver = {paRef.current.style.visibility="hidden"}*/>{item.fullname}</li>)}
                         <button onClick ={showContragent}>Show</button>
                     </div>)
         } else {
             return (
-                <div className = "wrapper">
+                <div className = "contragent_wrapper">
                     <input  ref = {selectRef} onChange ={changeInput}></input>
-                    {(list&&list.length!==0)?
-                    list.filter(item=>n.test(item.fullname))
+                    {(list&&list.length!==0)
+                    ?list.filter(item=>n.test(item.fullname))
                         .map(item =>
                         <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)
-                        :null} 
-                    <div> 
-                        <button onClick ={showContragent}>Show</button>
-                        <PersonalActivity type = "income" activity = {sumIncome0} somearray = {sumincome} someref = {selectRef}/>
-                        <PersonalActivity type = "outcome" activity = {sumOutcome0} somearray = {sumoutcome} someref = {selectRef}/>
-                        <PersonalActivity type = "loan" activity = {sumLoans0} somearray = {sumloans} someref = {selectRef}/>
-                        <PersonalActivity type = "investment" activity = {sumInvest0} somearray = {suminvest} someref = {selectRef}/> 
+                    :null
+                    } 
+                    <button onClick ={showContragent}>Show</button>
+                    <div className = "personal_activity">
+                        <div><span>Incomes</span><PersonalActivity type = "income" activity = {sumIncome0} somearray = {sumincome} someref = {selectRef} color = "red" dateActivated = {dateActivated}/></div>
+                        <div><span>Outcomes</span><PersonalActivity type = "outcome" activity = {sumOutcome0} somearray = {sumoutcome} someref = {selectRef} color = "blue" dateActivated = {dateActivated}/></div>
+                        <div><span>Loan</span><PersonalActivity type = "loan" activity = {sumLoans0} somearray = {sumloans} someref = {selectRef} color = "yellow" dateActivated = {dateActivated}/></div>
+                        <div><span>Investment</span><PersonalActivity type = "investment" activity = {sumInvest0} somearray = {suminvest} someref = {selectRef} color = "green"dateActivated = {dateActivated}/></div>
                     </div>
                 </div>)
                 }
     } else {return null}
 } 
 
-export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=> {
+export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}:Summary1)=> {
 
     function getEveryAmount(array:newData[]|undefined): number|null {
         if(array){
@@ -330,7 +321,7 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
                     return max}
             } else if(!prop&&max){
                 return max}
-              else { return prop}},0)
+              else {return prop}},0)
             return maxVal
         }
     }    
@@ -338,7 +329,7 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
   const yu:number|any = gmv1(uu)
   console.log(yu)
      
-     const GetSummary =({someData, trans}:getSummary) => {
+     const GetSummary =({someData, trans, color}:getSummary) => {
         if(someData&&someData.length!==0){
             const totalCount = someData.length
             const totalAmount:any =someData.map((item)=>item.amount).reduce(getSum,0)
@@ -346,29 +337,30 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest}:Summary1)=>
             return (
                 <div className = "summaryclass">
                     <div className = "trans">{trans}</div>
-                    <div>{totalCount}</div>
-                    <div id ="color" style =  {{backgroundColor:(trans==="income")?"red":(trans ==="outcome")?"steelBlue":(trans ==="loan")?"yellow":"lightgreen", width:`${totalAmount/yu*400}px`, height:"20px"}}></div>
-                    <div style ={{textAlign:"left"}}>{totalAmount}</div>
+                    <div id ="total">{totalCount}</div>
+                    <div id ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320/*400*/}px`, height:"20px"}}></div>
+                    <div className = "amount">{totalAmount}</div>
                 </div>)
         } else {
             return (
                 <div className = "summaryclass">
                     <div className = "trans">{trans}</div>
                     <div>-</div>
-                    <div>No {trans} at this period</div>
-                    <div>No</div>
+                    <div className = "amount">No {trans} at this period</div>
+                    <div className = "amount">No</div>
                 </div>
             )
         }
     }
     return(
       <div>
-            <ul className = "summary">
-                <li className="summaryheader"><h3> </h3><h3>Count</h3><h2>Summary</h2><h3>Amount</h3></li>
-                <li><GetSummary someData = {sumincome} trans = "income"/></li>
-                <li><GetSummary someData = {sumoutcome} trans = "outcome"/*}*//></li>
-                <li><GetSummary someData = {sumloans} trans ="loan"/></li>
-                <li><GetSummary someData = {suminvest} trans = "investment"/></li>
+           <Date1 cref = {cref} sref  ={sref}/>
+           <ul className = "summary">
+                <li className="summaryheader"><h3>Count </h3><h3> </h3><h2>Summary</h2><h3>Amount</h3></li>
+                <li><GetSummary someData = {sumincome} trans = "income" color = "red"/></li>
+                <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
+                <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
+                <li><GetSummary someData = {suminvest} trans = "investment" color ="green"/></li>
             </ul>
       </div>
     )
@@ -394,6 +386,7 @@ export const Transaction=({data}:Transaction1)=>{
   const submit=(e:React.ChangeEvent<HTMLFormElement>)=>{
     e.preventDefault()
     createContragent()
+       
     lnRef.current.value=''
     fnRef.current.value=''
     amRef.current.value=''
@@ -405,61 +398,36 @@ export const Transaction=({data}:Transaction1)=>{
     qRef.current.value = ''
     } 
 
-    function createContragent(){
+   function createContragent(){
     fetch('https://activities-server-db.herokuapp.com/contragents',{
     method: "POST",
     headers: {
-      "Content-Type": "application/jso;n;charset=utf-8"
+      "Content-Type": "application/json;charset=UTF-8"
       },
     body:JSON.stringify({
       _id: v4(),
-      fullname:`${lnRef.current.value} ${fnRef.current.value}`,
+      fullname: `${lnRef.current.value} ${fnRef.current.value}`,
       date:dateRef.current.value,
       type:trRef.current.value.toLowerCase(),
       amount:amRef.current.value,
-      email: mailRef.current.value,
+      email:mailRef.current.value,
       phone:numRef.current.value,
       address:adRef.current.value,
-      question:qRef.current.value
+      question:adRef.current.value
       })
   })
     .then(response => {
-          return response.text();
-        })
+          return response.json()   
+    })
         .then(data => {
           console.log(data)
         }).catch(err =>console.log(err));
     }
- /* async function createContragent(){
-    const response = await fetch('https://activities-server-db.herokuapp.com/contragents', {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8"
-        },
-      body:JSON.stringify({
-        _id: v4(),
-        fullname:`${lnRef.current.value} ${fnRef.current.value}`,
-        date:dateRef.current.value,
-        type:trRef.current.value.toLowerCase(),
-        amount:amRef.current.value,
-        email: mailRef.current.value,
-        phone:numRef.current.value,
-        address:adRef.current.value,
-        question:qRef.current.value
-        })
-    })
-      const body = await response.json()
-    if (response.status !== 200) {
-      throw Error(body.message) 
-    }
-    return body;
-  };*/
-  
-  let  lastName:newData[],firstName:newData[];
+ 
+  let  lastName:newData[]|null,firstName:newData[]|null
     const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
       const l1 = e.target.value
       setL(l1)
-      console.log(l1)
       setViewLast(true)
       if(lastName&&lastName.length!==0){
         for (let i of lastName){
@@ -469,8 +437,8 @@ export const Transaction=({data}:Transaction1)=>{
     }
      
    const ln= new RegExp(l)
-  
-   const firstname = (e:React.ChangeEvent<HTMLInputElement>)=>{
+   console.log(ln)
+    const firstname = (e:React.ChangeEvent<HTMLInputElement>)=>{
     const f1 = e.target.value
     const fn = new RegExp(f1)
     if(firstName&&firstName.length!==0){
@@ -479,27 +447,30 @@ export const Transaction=({data}:Transaction1)=>{
       }
     } 
    }
+  let lastName1:newData[]|null
     if(data&&l){
-        const lastName1 = data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))
-        removeDoubleLast(lastName1)
+        lastName1 = data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))
+        if (lastName1){
+        removeDoubleNameSum(lastName1)
         console.log(lastName1)
-        lastName = lastName1.filter(item=>item.amount!==0)
+        lastName = lastName1.filter(item=>item.amount!==0)} else {lastName = null}
         const firstName1 = data.filter(item=>item.fullname.split(/\s/)[0]===lnRef.current.value).sort((a,b)=>(a.fullname.split(/]s/)[1] > b.fullname.split(/\s/)[1]) ? 1 :((b.fullname.split(/\s/)[1] > a.fullname.split(/\s/)[1]) ? -1: 0))
-        removeDoubleFirst(firstName1)
+        removeDoubleNameSum(firstName1)
         firstName = firstName1.filter(item=>item.amount!==0)
        
        const onClickLast = (_id:string) =>{
-       const name1 = lastName.filter(item=>item._id===_id)
+       const name1 = (lastName)?lastName.filter(item=>item._id===_id):[]
        lnRef.current.value = name1[0].fullname.split(/\s/)[0]
        setViewFirst(true)
        setViewLast(false)
-       firstName = lastName.filter(item=>lnRef.current.value===item.fullname.split(/\s/)[0])
-                           .sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] > a.fullname.split(/\s/)[0]) ? -1: 0))
+       firstName = (lastName)?(lastName.filter(item=>lnRef.current.value===item.fullname.split(/\s/)[0])
+                           .sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] > a.fullname.split(/\s/)[0]) ? -1: 0)))
+                           :null
       } 
     
   
     const onClickFirst = (_id:string) =>{
-        const name1 = firstName.filter(item=>item._id===_id)
+        const name1 = (firstName)?firstName.filter(item=>item._id===_id):[]
         fnRef.current.value = name1[0].fullname.split(/\s/)[1]
         setViewFirst(false)
         const latestData0= data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
@@ -517,16 +488,16 @@ export const Transaction=({data}:Transaction1)=>{
       return(
         <div>
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
-              <div className="form-zvonok"> 
+              <div> 
                 <label>Transaction <span>*</span></label>
-                <select name='transactiontype' ref ={trRef}>
+                <select ref ={trRef}>
                     <option>Income</option>
                     <option>Outcome</option>
                     <option>Loan</option>
                     <option>Investment</option>
                 </select>
                 <label>Date <span>*</span></label>
-                <input type='date' name='date' ref = {dateRef} required/>
+                <input type='date' ref = {dateRef} required/>
                 <label>Last name <span>*</span></label>
                 <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/>
                 <ul className = {(viewLast)?"visiblement":"cached"}> {(lastName&&lastName.length!==0)?(lastName.map((item, i)=><li key = {i} onClick = {()=>onClickLast(item._id)}>{item.fullname.split(/\s/)[0]}</li>)):null}</ul>
@@ -550,10 +521,11 @@ export const Transaction=({data}:Transaction1)=>{
               </div>
             </form>
         </div>
-      )} else {return(
+      )} else if(data){
+ return (
         <div>
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
-              <div className="form-zvonok"> 
+              <div> 
                 <label>Transaction <span>*</span></label>
                 <select name='transactiontype' ref ={trRef}>
                     <option>Income</option>
@@ -562,7 +534,7 @@ export const Transaction=({data}:Transaction1)=>{
                     <option>Investment</option>
                 </select>
                 <label>Date <span>*</span></label>
-                <input type='date' name='date' ref = {dateRef} required/>
+                <input type='date' ref = {dateRef} required/>
                 <label>Last name <span>*</span></label>
                 <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/>
                 <label>First name <span>*</span></label>
@@ -584,5 +556,5 @@ export const Transaction=({data}:Transaction1)=>{
               </div>
             </form>
         </div>)
-    } 
+    } else {return null}
 }

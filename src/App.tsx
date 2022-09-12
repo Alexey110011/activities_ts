@@ -17,7 +17,7 @@ export type newData = {
   question?:string
 }
     
- type Date={
+ export type Date2={
   cref:React.MutableRefObject<HTMLInputElement>,
   sref:React.MutableRefObject<HTMLSelectElement>,
  }
@@ -35,10 +35,17 @@ export type newData = {
     const sortedArray = array.sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
     return sortedArray
     }
+    
   const data1:newData[] = structuredClone(dataFromFile.data)
-  console.log(dataFromFile, data1)
-  
-  
+    
+  export const Date1=({cref, sref}:Date2)=>{
+    if(sref.current&&cref.current.value!==''){
+        return(
+        <h3 className = "date"> Data {sref.current.value} {cref.current.value} shown</h3>
+    )
+    } else {return null}
+  }
+
 
 const App=() =>{
    
@@ -52,8 +59,10 @@ const App=() =>{
     const [rangeAmount, setRangeAmount] = useState(false)
     const [rangeDate, setRangeDate] = useState(false)
     const [serverActivated, setServerActivated] = useState(false)
+    const [dateActivated, setDateActivated] = useState(false)
     const [info_modal,setInfo_modal] = useState(false)
-    const modalRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const canvasRef = useRef() as React.MutableRefObject<HTMLDivElement>
+    const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>
 
@@ -79,39 +88,12 @@ const App=() =>{
       setSumInvest(sumInvest1)
     },[dateData])
 
-    const Date=({cref, sref}:Date)=>{
-      if(selectRef1.current&&calRef.current.value!==''){
-          return(
-          <h3 style={{margin:"20px 20% 0 20%"}}>Data {selectRef1.current.value} {calRef.current.value} shown</h3>
-      )
-      } else {return null}
-    }
-
-    const Modal =({serverActivated}:Modal)=>{
-      if(!serverActivated){
-        return(
-          <div ref = {modalRef} className = {(!info_modal)?"modal":"modal_hidden"}>
-            <div className = "alert">
-              Behind you see data from local json file. <br/>
-              If you want to manage your own data,
-              you may "Activate server" and begin to work with them.
-              <button className = "modal_btn" onClick = {hideModal}>X</button>  </div>
-          </div>)
-      } else {
-          return( 
-          <div ref = {modalRef} className = {(!info_modal)?"modal":"modal_hidden"}>
-          <div className = "alert">
-            At the moment database may countain data of other users. <br/>
-            You may use or add them or "Clear database" and work from scratch.
-            <button className = "modal_btn" onClick = {hideModal}>X</button>  </div>
-        </div>)}
-    }
-
-   function hideModal(){
+    function hideModal(){
     setInfo_modal(true)
-    }
+  }
 
     function getContragents() {
+      canvasRef.current.className = "canvas_spin"
         fetch('https://activities-server-db.herokuapp.com/m')
         .then(response => {
           return response.text();
@@ -121,6 +103,7 @@ const App=() =>{
           const id1= JSON.parse(data)
           const id = toLocale(id1)
           setData(id);
+          canvasRef.current.className = "canvas"
           console.log(data)
          })
       }
@@ -156,10 +139,9 @@ const App=() =>{
     function startServer(){
      setServerActivated(!serverActivated)
      setInfo_modal(!info_modal)
-      if(!calRef.current.value){
+     if(!calRef.current.value){
         getContragents()
-       
-      } else {
+     } else {
         getTimes()
       }
     }
@@ -170,8 +152,7 @@ const App=() =>{
           return response.text();
         })
         .then(data => {
-        
-          console.log(data)
+         console.log(data)
         });
     }
 
@@ -194,6 +175,8 @@ const App=() =>{
     }
 
     function calendarFunc(){
+      setDateActivated(true)
+      canvasRef.current.className = "canvas_spin"
       let calendar;
       if (calRef.current.value){
         if(!serverActivated){
@@ -205,34 +188,59 @@ const App=() =>{
                 (selectRef1.current.value ==="After")?item.date>calRef.current.value:null
           }));
           setDateData(calendar)
-        } else {
+           } else {
           getTimes()
         }
       } else {
         if(!serverActivated){
           setDateData(data)
-        } else {
+          } else {
         getContragents()
         }
-      }
+      } 
+      if(!calRef.current.value){
+        setDateActivated(false)}
+        canvasRef.current.className='canvas'
+    } 
+    
+    
+    const Modal =({serverActivated}:Modal)=>{
+      if(!serverActivated){
+        return(
+            <div ref = {modalRef} className = {(!info_modal)?"alert":"alert_hidden"}>
+                Behind you see data from local json file. <br/>
+                If you want to manage your own data,
+                you may "Activate server" and begin to work with them.
+                <button className = "modal_btn" onClick = {hideModal}>X</button>  
+            </div>
+        )
+      } else {
+          return( 
+           <div ref = {modalRef}  className = {(!info_modal)?"alert":"alert_hidden"}>
+              At the moment database may countain data of other users. <br/>
+              You may use or add them or "Clear database" and work from scratch.
+              <button className = "modal_btn" onClick = {hideModal}>X</button>
+           </div>
+        )}
     }
+
   return(
-      <div className ="wrapper1"> 
-        <Modal serverActivated = {serverActivated}/>
+      <div className ="app_wrapper"> 
+       {/*<Modal serverActivated = {serverActivated}/>*/}
           <div className = "tablo" onClick = {getServerData}>
               <nav className = "navpanel">
-                  <ul> 
-                    <Link to = "/tab=5"><li>New transaction</li></Link>
-                    <Link to = "/tab=0"><li>Income</li></Link>
-                    <Link to = "/tab=1"><li>Outcome</li></Link>
-                    <Link to = "/tab=2"><li>Loans</li></Link>
-                    <Link to = "/tab=3"><li>Investments</li></Link>
-                    <Link to = "/tab=4"><li>Contragents</li></Link>
-                    <Link to = "/"><li>Summary</li></Link>
-                </ul>
+                   <ul>
+                      <Link to = "/tab=0"><li>Income</li></Link>
+                      <Link to = "/tab=1"><li>Outcome</li></Link>
+                      <Link to = "/tab=2"><li>Loans</li></Link>
+                      <Link to = "/tab=3"><li>Investments</li></Link>
+                      <Link to = "/tab=4"><li>Contragents</li></Link>
+                      <Link to = "/"><li>Summary</li></Link> 
+                      <Link to = "/tab=5"><li>New transaction</li></Link>
+                    </ul>
               </nav>
           </div>
-          <div className="wrapper">
+          <div className="change">
               <input type = "date" ref = {calRef} onInput = {calendarFunc}/>
               <select ref = {selectRef1} onChange = {calendarFunc}>
                 <option>Before</option>
@@ -241,20 +249,20 @@ const App=() =>{
                 <option>From</option>
                 <option>After</option>
               </select> 
-               Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
-              date<input type = "checkbox" onChange={rangeByDate}></input>
-              <ul style = {{listStyleType:"none",position : "absolute", bottom: "535px",left:"500px"}}>
-                <li><input style = {{backgroundColor:"lightBlue", border: "none"}} type = 'checkbox' onChange = {startServer}></input>Activate server</li>
+               <div className = "range">Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
+               date<input type = "checkbox" onChange={rangeByDate}></input>
+               </div>
+              <ul style = {{listStyleType:"none",position : "relative", top: "-27px",left:"478px", marginBottom: "-30px"}}>
+                <li><input type = 'checkbox' onChange = {startServer}></input>Activate server</li>
                 <li><input type = 'checkbox' onChange = {clearDatabase}></input>Clear database</li>
               </ul>
           </div>
-          <Date cref = {calRef} sref = {selectRef1}/>
-          <Routes>
-              <Route path = "/tab=0" element ={<Activity someactivity = {sumIncome} type = "Income" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="red"/>}/>
-              <Route path = "/tab=1" element ={<Activity someactivity = {sumOutcome} type = "Outcome" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="steelBlue"/>}/>
-              <Route path = "/tab=2" element ={<Activity someactivity = {sumLoan} type = "Loan" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "yellow"/>} />
-              <Route path = "/tab=3" element ={<Activity someactivity = {sumInvest} type  = "Investment"rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "lightgreen"/>}/>
-              <Route path = "/tab=4" element ={<Contragent data = {data} serverActivated = {serverActivated} 
+           <Routes>
+              <Route path = "/tab=0" element ={<Activity someactivity = {sumIncome} type = "Income" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="red" cref = {calRef} sref = {selectRef1}/>}/>
+              <Route path = "/tab=1" element ={<Activity someactivity = {sumOutcome} type = "Outcome" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="steelBlue"cref = {calRef} sref = {selectRef1}/>}/>
+              <Route path = "/tab=2" element ={<Activity someactivity = {sumLoan} type = "Loan" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "yellow"cref = {calRef} sref = {selectRef1}/>} />
+              <Route path = "/tab=3" element ={<Activity someactivity = {sumInvest} type  = "Investment"rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "lightgreen"cref = {calRef} sref = {selectRef1}/>}/>
+              <Route path = "/tab=4" element ={<Contragent data = {data} dateData = {dateData} serverActivated = {serverActivated} dateActivated = {dateActivated}
                                                                         sumincome = {sumIncome}
                                                                         sumoutcome = {sumOutcome}
                                                                         sumloans = {sumLoan}
@@ -262,9 +270,13 @@ const App=() =>{
               <Route path = "/" element ={<Summary data = {data} sumincome = {sumIncome}
                                                                  sumoutcome = {sumOutcome}
                                                                  sumloans = {sumLoan}
-                                                                 suminvest = {sumInvest}/>}/>
+                                                                 suminvest = {sumInvest}
+                                                                 cref = {calRef} 
+                                                                 sref = {selectRef1}/>}/>
               <Route path = "/tab=5" element ={<Transaction data={data}/>}/>
           </Routes> 
+          <div className = "canvas" ref = {canvasRef}>
+          </div>
       </div>
       )
     }

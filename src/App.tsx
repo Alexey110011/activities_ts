@@ -23,7 +23,8 @@ export type newData = {
  }
 
  type Modal = {
-  serverActivated:boolean
+  serverActivated:boolean,
+  fileAlert:boolean
  }
 
   function toLocale(array:newData[]):newData[] {
@@ -61,10 +62,14 @@ const App=() =>{
     const [serverActivated, setServerActivated] = useState(false)
     const [dateActivated, setDateActivated] = useState(false)
     const [info_modal,setInfo_modal] = useState(false)
+    const [fileAlert, setFileAlert] = useState(false)
+    const [firstAlert, setFirstAlert] = useState(false)
     const canvasRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>
+    const amountRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const dateRef = useRef() as React.MutableRefObject<HTMLInputElement>
 
     useEffect(()=> {
       const sumIncome1 = data.filter(item=>item.type === 'income')
@@ -99,7 +104,7 @@ const App=() =>{
           return response.text();
         })
         .then(data => {
-          setInfo_modal(!info_modal)
+          
           const id1= JSON.parse(data)
           const id = toLocale(id1)
           setData(id);
@@ -137,13 +142,21 @@ const App=() =>{
         }
 
     function startServer(){
-     setServerActivated(!serverActivated)
-     setInfo_modal(!info_modal)
+      if(!serverActivated){
+        setFirstAlert(true)
+      }
+      setFileAlert(true)
+      setServerActivated(!serverActivated)
+      if(!firstAlert){
+     setInfo_modal(!info_modal)}
+
      if(!calRef.current.value){
         getContragents()
      } else {
         getTimes()
       }
+    if(!serverActivated){
+      setData(data1)}
     }
 
   function clearDatabase(){
@@ -165,11 +178,13 @@ const App=() =>{
     }
 
     function rangeByAmount(){
+      dateRef.current.checked = false
       setRangeAmount(!rangeAmount)
       setRangeDate(false)
     }
     
     function rangeByDate(){
+      amountRef.current.checked = false
       setRangeDate(!rangeDate)
       setRangeAmount(false)
     }
@@ -204,33 +219,38 @@ const App=() =>{
     } 
     
     
-    const Modal =({serverActivated}:Modal)=>{
-      if(!serverActivated){
+    const ModalFile =({serverActivated, fileAlert}:Modal)=>{
+      if(!serverActivated&&!fileAlert){
         return(
             <div ref = {modalRef} className = {(!info_modal)?"alert":"alert_hidden"}>
                 Behind you see data from local json file. <br/>
                 If you want to manage your own data,
-                you may "Activate server" and begin to work with them.
+                you may <b>"Activate server"</b> and begin to work with them.
                 <button className = "modal_btn" onClick = {hideModal}>X</button>  
             </div>
-        )
-      } else {
+        )} else {return null}
+      } 
+
+      const ModalServer = ({serverActivated, fileAlert}:Modal) =>{
+        if(serverActivated&&fileAlert){
           return( 
            <div ref = {modalRef}  className = {(!info_modal)?"alert":"alert_hidden"}>
               At the moment database may countain data of other users. <br/>
               You may use or add them or "Clear database" and work from scratch.
               <button className = "modal_btn" onClick = {hideModal}>X</button>
            </div>
-        )}
+        )}else {return null}
     }
 
   return(
       <div className ="app_wrapper"> 
-       {/*<Modal serverActivated = {serverActivated}/>*/}
-          <div className = "tablo" onClick = {getServerData}>
+       <ModalFile serverActivated = {serverActivated} fileAlert = {fileAlert}/>
+       <ModalServer serverActivated = {serverActivated} fileAlert = {fileAlert}/>
+       <div className = "tablo" onClick = {getServerData}>
               <nav className = "navpanel">
                    <ul>
-                      <Link to = "/tab=0"><li>Income</li></Link>
+                      <Link to = "/tab=0"><li /*onClick = {(e)=>e.current.target.addEventListener('click', ()=>
+                      e.target.color = "red")}*/>Income</li></Link>
                       <Link to = "/tab=1"><li>Outcome</li></Link>
                       <Link to = "/tab=2"><li>Loans</li></Link>
                       <Link to = "/tab=3"><li>Investments</li></Link>
@@ -249,10 +269,13 @@ const App=() =>{
                 <option>From</option>
                 <option>After</option>
               </select> 
-               <div className = "range">Range by: amount<input type = "checkbox" onChange={rangeByAmount}></input>
-               date<input type = "checkbox" onChange={rangeByDate}></input>
+               <div className = "range">
+                Range by: amount
+               <input type = "checkbox" onChange={rangeByAmount} ref ={amountRef}></input>
+                date
+              <input type = "checkbox" onChange={rangeByDate} ref = {dateRef}></input>
                </div>
-              <ul style = {{listStyleType:"none",position : "relative", top: "-27px",left:"478px", marginBottom: "-30px"}}>
+              <ul className = "callServer">
                 <li><input type = 'checkbox' onChange = {startServer}></input>Activate server</li>
                 <li><input type = 'checkbox' onChange = {clearDatabase}></input>Clear database</li>
               </ul>

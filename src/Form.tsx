@@ -45,7 +45,6 @@ type newData = {
         cref:React.MutableRefObject<HTMLInputElement>,
         sref:React.MutableRefObject<HTMLSelectElement> 
     }
-
     interface PersonalActivity1 {
         type:string,
         activity:number|null|undefined,
@@ -54,7 +53,6 @@ type newData = {
         color:string,
         dateActivated:boolean
     }
-
     interface Contragent1 {
         data:newData[]|undefined,
         dateData:newData[]|undefined,
@@ -65,8 +63,7 @@ type newData = {
         serverActivated:boolean,
         dateActivated:boolean
     }
-
-      interface Summary1 {
+    interface Summary1 {
         data:newData[]|undefined,
         sumincome:newData[]|undefined,
         sumoutcome:newData[]|undefined,
@@ -145,9 +142,9 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         const totalAmount = someData.map(item=>item.amount).reduce(getSum,0)
         if(!rangeAmount&&!rangeDate){
             return(
-            <div>
+            <div className = "component_wrapper">
                 <Date1 cref = {cref} sref  ={sref}/>
-                <div className = "activity_wrapper">
+                <div>
                     <div className = "activity_info" style = {{borderBottom:`2px solid ${color}`}}><h3>{type} {totalAmount}</h3></div>
                    {someData.map((item:newData,i:number)=>
                     <li className = "activity" key = {i} >
@@ -162,12 +159,13 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         else 
         if(rangeAmount&&!rangeDate){
             return(
-                <div className="activity_wrapper">
-                     <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
+                <div className = "component_wrapper">
+                     <Date1 cref = {cref} sref  ={sref}/>
+                     <div className = "activity_info" style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.amount<b.amount)?1:(a.amount>b.amount)?-1:0)//))  
                     .map((item,i)=>
-                    <li className = "activity" key = {i} >
+                    <li className = "" key = {i} >
                         <div className ="fullname">{item.fullname}</div>
                         <div className = "amount1">{item.amount}</div>
                         <div className = "rectangler" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
@@ -177,8 +175,9 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         else 
         if(!rangeAmount&&rangeDate){
             return(
-                <div className = "activity_wrapper">
-                    <div style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
+                <div className = "component_wrapper">
+                    <Date1 cref = {cref} sref  ={sref}/>
+                    <div className = "activity_info" style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
                     .map((item,i)=>
@@ -192,7 +191,9 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
     } else {return null} 
 }
 
-const PersonalActivity = ({type, activity, somearray,someref, color, dateActivated}:PersonalActivity1)=>{   
+const PersonalActivity = ({type, activity, somearray,someref, color, dateActivated}:PersonalActivity1)=>{ 
+    const textareaRef = useRef()  as React.MutableRefObject<HTMLTextAreaElement>
+
     const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
     if(somearray&&activity&&someref.current.value!=='') {
        return(
@@ -205,17 +206,17 @@ const PersonalActivity = ({type, activity, somearray,someref, color, dateActivat
                             .map((item, i)=>
                                 <li className = "showcontragent" key = {i}>
                                    {item.date} : {item.amount}
-                                   <textarea style ={{position:"relative", top:"10px"}} 
-                                             defaultValue = {item.question} 
+                                   <textarea defaultValue = {item.question} 
                                              onMouseOver= {()=>noteRef.current.className = "comments1" } 
                                              onClick = {()=>noteRef.current.className = "comments"} 
                                              onMouseLeave={()=>noteRef.current.className = "comments" }
                                              onBlur = {(e)=>updateContragent(e,item._id)}>
                                    </textarea>
-                                            <span ref = {noteRef} className = "comments">Change note?</span>
+                                            <span ref = {noteRef} className = "comments">Change note</span>
                                 </li>)
                             :null} 
                         </ul>
+                        
                    </div>)
         } else {return null}
     }
@@ -226,12 +227,13 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
     const [sumLoans0, setSumLoans0] = useState<number|null>()
     const [sumInvest0, setSumInvest0] = useState<number|null>()
     const [reg, setReg] = useState<string>('')
-
+    const listRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const selectRef = useRef() as React.MutableRefObject<HTMLInputElement>
 
     function changeInput(e:React.ChangeEvent<HTMLInputElement>) {
         const reg1= e.target.value
         setReg(reg1)
+        listRef.current.className = "list"
         }
     const n = new RegExp(reg)
 
@@ -252,6 +254,7 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
         setSumOutcome0(outcomes)
         setSumLoans0(loans)
         setSumInvest0(investments)
+        listRef.current.className = "list_hidden"
     }
 
     if(data){
@@ -269,23 +272,27 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
 
         if(!selectRef.current){
             return (
-                <div className = "contragent_wrapper">
+                <div className = "component_wrapper">
                    <input ref = {selectRef} onChange = {changeInput}></input>
-                    {list.map((item,i)=>
-                        <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)} /*onMouseOver = {paRef.current.style.visibility="hidden"}*/>{item.fullname}</li>)}
+                    <div ref = {listRef} className =  "list">
+                        {list.map((item,i)=>
+                        <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)}
                         <button onClick ={showContragent}>Show</button>
-                    </div>)
+                    </div>
+                </div>)
         } else {
             return (
-                <div className = "contragent_wrapper">
-                    <input  ref = {selectRef} onChange ={changeInput}></input>
-                    {(list&&list.length!==0)
+                <div className = "component_wrapper">
+                     <input  ref = {selectRef} onChange ={changeInput}></input>
+                     <div ref = {listRef} className = "list">
+                         {(list&&list.length!==0)
                     ?list.filter(item=>n.test(item.fullname))
                         .map(item =>
                         <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)
                     :null
                     } 
-                    <button onClick ={showContragent}>Show</button>
+                   <button onClick ={showContragent}>Show</button>
+                   </div>
                     <div className = "personal_activity">
                         <div><span>Incomes</span><PersonalActivity type = "income" activity = {sumIncome0} somearray = {sumincome} someref = {selectRef} color = "red" dateActivated = {dateActivated}/></div>
                         <div><span>Outcomes</span><PersonalActivity type = "outcome" activity = {sumOutcome0} somearray = {sumoutcome} someref = {selectRef} color = "blue" dateActivated = {dateActivated}/></div>
@@ -338,25 +345,25 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}
                 <div className = "summaryclass">
                     <div className = "trans">{trans}</div>
                     <div id ="total">{totalCount}</div>
-                    <div id ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320/*400*/}px`, height:"20px"}}></div>
-                    <div className = "amount">{totalAmount}</div>
+                    <div id ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
+                    <div id /*className*/ ="amount">{totalAmount}</div>
                 </div>)
         } else {
             return (
                 <div className = "summaryclass">
                     <div className = "trans">{trans}</div>
                     <div>-</div>
-                    <div className = "amount">No {trans} at this period</div>
-                    <div className = "amount">No</div>
+                    <div className = "amount_summ">No {trans} at this period</div>
+                    <div className = "amount" id = "amount">No</div>
                 </div>
             )
         }
     }
     return(
-      <div>
+      <div className = "component_wrapper">
            <Date1 cref = {cref} sref  ={sref}/>
+           <div className="summaryheader"><h3>Count </h3><h4> </h4><h2>Summary</h2><h3>Amount</h3></div>
            <ul className = "summary">
-                <li className="summaryheader"><h3>Count </h3><h3> </h3><h2>Summary</h2><h3>Amount</h3></li>
                 <li><GetSummary someData = {sumincome} trans = "income" color = "red"/></li>
                 <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
                 <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
@@ -376,6 +383,7 @@ export const Transaction=({data}:Transaction1)=>{
     const adRef = useRef()as React.MutableRefObject<HTMLInputElement>
     const dateRef = useRef()as React.MutableRefObject<HTMLInputElement>
     const qRef = useRef()as React.MutableRefObject<HTMLTextAreaElement>
+    const submitRef = useRef() as React.MutableRefObject<HTMLInputElement>
   
    const [l, setL]= useState<string>('')
    const [viewLast,setViewLast]= useState(false)
@@ -399,13 +407,14 @@ export const Transaction=({data}:Transaction1)=>{
     } 
 
    function createContragent(){
+    submitRef.current.disabled = true
     fetch('https://activities-server-db.herokuapp.com/contragents',{
     method: "POST",
     headers: {
       "Content-Type": "application/json;charset=UTF-8"
       },
     body:JSON.stringify({
-      _id: v4(),
+      _id: 100/*v4()*/,
       fullname: `${lnRef.current.value} ${fnRef.current.value}`,
       date:dateRef.current.value,
       type:trRef.current.value.toLowerCase(),
@@ -420,8 +429,10 @@ export const Transaction=({data}:Transaction1)=>{
           return response.json()   
     })
         .then(data => {
-          console.log(data)
+          console.log(data);
+          submitRef.current.disabled = false
         }).catch(err =>console.log(err));
+        submitRef.current.disabled = false
     }
  
   let  lastName:newData[]|null,firstName:newData[]|null
@@ -486,10 +497,9 @@ export const Transaction=({data}:Transaction1)=>{
     }
         
       return(
-        <div>
+        <div className = "component_wrapper form" >
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
-              <div> 
-                <label>Transaction <span>*</span></label>
+              <label>Transaction <span>*</span></label>
                 <select ref ={trRef}>
                     <option>Income</option>
                     <option>Outcome</option>
@@ -517,13 +527,12 @@ export const Transaction=({data}:Transaction1)=>{
                         <label>Notes</label>
                     </div>
                 <textarea className = "text" name='question' ref = {qRef}/>
-                <input className="bot-send-mail" type='submit' value='Send'/>
-              </div>
+                <input className="bot-send-mail" type='submit' value='Send' ref = {submitRef}/>
             </form>
         </div>
       )} else if(data){
  return (
-        <div>
+        <div className = "component_wrapper" >
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
               <div> 
                 <label>Transaction <span>*</span></label>

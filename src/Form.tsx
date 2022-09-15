@@ -192,9 +192,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
 }
 
 const PersonalActivity = ({type, activity, somearray,someref, color, dateActivated}:PersonalActivity1)=>{ 
-    const textareaRef = useRef()  as React.MutableRefObject<HTMLTextAreaElement>
-
-    const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
+     const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
     if(somearray&&activity&&someref.current.value!=='') {
        return(
             <div>
@@ -216,8 +214,7 @@ const PersonalActivity = ({type, activity, somearray,someref, color, dateActivat
                                 </li>)
                             :null} 
                         </ul>
-                        
-                   </div>)
+                    </div>)
         } else {return null}
     }
 
@@ -346,7 +343,7 @@ export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}
                     <div className = "trans">{trans}</div>
                     <div id ="total">{totalCount}</div>
                     <div id ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
-                    <div id /*className*/ ="amount">{totalAmount}</div>
+                    <div id ="amount">{totalAmount}</div>
                 </div>)
         } else {
             return (
@@ -414,7 +411,7 @@ export const Transaction=({data}:Transaction1)=>{
       "Content-Type": "application/json;charset=UTF-8"
       },
     body:JSON.stringify({
-      _id: 100/*v4()*/,
+      _id: v4(),
       fullname: `${lnRef.current.value} ${fnRef.current.value}`,
       date:dateRef.current.value,
       type:trRef.current.value.toLowerCase(),

@@ -1,7 +1,7 @@
 import './App.css';
 import {Routes, Route , Link }from 'react-router-dom';
 import dataFromFile from "./list.json"
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect} from 'react';
 import {Activity, Contragent, Summary, Transaction} from './Form'
 
 export type newData = {
@@ -64,8 +64,13 @@ const App=() =>{
     const [info_modal,setInfo_modal] = useState(false)
     const [fileAlert, setFileAlert] = useState(false)
     const [firstAlert, setFirstAlert] = useState(false)
-    const canvasRef = useRef() as React.MutableRefObject<HTMLDivElement>
+    const loaderRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
+    const fileRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const dbaseRef = useRef() as React.MutableRefObject<HTMLInputElement>
+    const spanRef = useRef() as React.MutableRefObject<HTMLSpanElement>
+    const menuRef = useRef() as React.MutableRefObject<HTMLUListElement>
+    const labelRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const calRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const selectRef1 = useRef() as React.MutableRefObject<HTMLSelectElement>
     const amountRef = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -98,17 +103,16 @@ const App=() =>{
   }
 
     function getContragents() {
-      canvasRef.current.className = "canvas_spin"
+      loaderRef.current.className = "loader_spin"
         fetch('https://activities-server-db.herokuapp.com/m')
         .then(response => {
           return response.text();
         })
         .then(data => {
-          
           const id1= JSON.parse(data)
           const id = toLocale(id1)
           setData(id);
-          canvasRef.current.className = "canvas"
+          loaderRef.current.className = "loader"
           console.log(data)
          })
       }
@@ -116,6 +120,7 @@ const App=() =>{
     function getTimes() {
       const date = calRef.current.value
       const sign = selectRef1.current.value
+      loaderRef.current.className = "loader_spin"
       console.log(calRef.current.value)
       if(calRef.current.value){     
         fetch('https://activities-server-db.herokuapp.com/times',  {
@@ -138,7 +143,7 @@ const App=() =>{
             });
             } else {
               getContragents()
-            }
+            }loaderRef.current.className = "loader"
         }
 
     function startServer(){
@@ -157,6 +162,8 @@ const App=() =>{
       }
     if(!serverActivated){
       setData(data1)}
+      fileRef.current.checked = false
+      
     }
 
   function clearDatabase(){
@@ -177,6 +184,17 @@ const App=() =>{
       }
     }
 
+     function showMenu (){
+      menuRef.current.classList.toggle('menu_open')
+      labelRef.current.classList.toggle('label_up')
+    }
+ 
+   function getFileData(){
+    setData(data1)
+    setServerActivated(false)
+    dbaseRef.current.checked = false
+  }
+
     function rangeByAmount(){
       dateRef.current.checked = false
       setRangeAmount(!rangeAmount)
@@ -191,7 +209,7 @@ const App=() =>{
 
     function calendarFunc(){
       setDateActivated(true)
-      canvasRef.current.className = "canvas_spin"
+      loaderRef.current.className = "loader_spin"
       let calendar;
       if (calRef.current.value){
         if(!serverActivated){
@@ -215,7 +233,7 @@ const App=() =>{
       } 
       if(!calRef.current.value){
         setDateActivated(false)}
-        canvasRef.current.className='canvas'
+        loaderRef.current.className='loaderr'
     } 
     
     
@@ -224,8 +242,8 @@ const App=() =>{
         return(
             <div ref = {modalRef} className = {(!info_modal)?"alert":"alert_hidden"}>
                 Behind you see data from local json file. <br/>
-                If you want to manage your own data,
-                you may <b>"Activate server"</b> and begin to work with them.
+                If you want to input and operate your own data,
+                you may change mode to <b>"Database"</b> and begin to work with them.
                 <button className = "modal_btn" onClick = {hideModal}>X</button>  
             </div>
         )} else {return null}
@@ -236,7 +254,7 @@ const App=() =>{
           return( 
            <div ref = {modalRef}  className = {(!info_modal)?"alert":"alert_hidden"}>
               At the moment database may countain data of other users. <br/>
-              You may use or add them or "Clear database" and work from scratch.
+              You may use or add them or <b>"Clear database"</b> and work from scratch.
               <button className = "modal_btn" onClick = {hideModal}>X</button>
            </div>
         )}else {return null}
@@ -246,11 +264,10 @@ const App=() =>{
       <div className ="app_wrapper"> 
        <ModalFile serverActivated = {serverActivated} fileAlert = {fileAlert}/>
        <ModalServer serverActivated = {serverActivated} fileAlert = {fileAlert}/>
-       <div className = "tablo" onClick = {getServerData}>
+       <div className = "tablo" onClick={getServerData}>
               <nav className = "navpanel">
                    <ul>
-                      <Link to = "/tab=0"><li /*onClick = {(e)=>e.current.target.addEventListener('click', ()=>
-                      e.target.color = "red")}*/>Income</li></Link>
+                      <Link to = "/tab=0"><li>Income</li></Link>
                       <Link to = "/tab=1"><li>Outcome</li></Link>
                       <Link to = "/tab=2"><li>Loans</li></Link>
                       <Link to = "/tab=3"><li>Investments</li></Link>
@@ -261,23 +278,27 @@ const App=() =>{
               </nav>
           </div>
           <div className="change">
-              <input type = "date" ref = {calRef} onInput = {calendarFunc}/>
-              <select ref = {selectRef1} onChange = {calendarFunc}>
-                <option>Before</option>
-                <option>Until</option>
-                <option>For</option>
-                <option>From</option>
-                <option>After</option>
-              </select> 
+              <input type = "date" ref = {calRef} onInput = {calendarFunc}/> 
+                <select ref = {selectRef1} onChange = {calendarFunc}>
+                  <option>Before</option>
+                  <option>Until</option>
+                  <option>For</option>
+                  <option>From</option>
+                  <option>After</option>
+               </select> 
                <div className = "range">
                 Range by: amount
                <input type = "checkbox" onChange={rangeByAmount} ref ={amountRef}></input>
                 date
-              <input type = "checkbox" onChange={rangeByDate} ref = {dateRef}></input>
+               <input type = "checkbox" onChange={rangeByDate} ref = {dateRef}></input>
                </div>
-              <ul className = "callServer">
-                <li><input type = 'checkbox' onChange = {startServer}></input>Activate server</li>
-                <li><input type = 'checkbox' onChange = {clearDatabase}></input>Clear database</li>
+               <ul className = "callServer">
+                  <li><span ref = {spanRef} className='callServerSpan' onClick = {showMenu}>Data source <div ref  ={labelRef} className = "label_down"></div> {(!serverActivated)?"File":"Database"}</span></li>
+                  <ul ref  ={menuRef} className =  "menu">
+                    <li><input type = "radio" onChange = {getFileData} name ="choose" ref = {fileRef} defaultChecked/>File</li>
+                    <li><input type = 'radio' onChange = {startServer}  name = "choose" ref ={dbaseRef}/>Database</li>
+                    <li className ={serverActivated?"info1":"noinfo1"}><input type = 'checkbox' onChange = {clearDatabase}/><span style ={{color: "red"}}>Clear database</span></li>
+                  </ul>
               </ul>
           </div>
            <Routes>
@@ -285,7 +306,7 @@ const App=() =>{
               <Route path = "/tab=1" element ={<Activity someactivity = {sumOutcome} type = "Outcome" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color ="steelBlue"cref = {calRef} sref = {selectRef1}/>}/>
               <Route path = "/tab=2" element ={<Activity someactivity = {sumLoan} type = "Loan" rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "yellow"cref = {calRef} sref = {selectRef1}/>} />
               <Route path = "/tab=3" element ={<Activity someactivity = {sumInvest} type  = "Investment"rangeAmount = {rangeAmount} rangeDate = {rangeDate} color = "lightgreen"cref = {calRef} sref = {selectRef1}/>}/>
-              <Route path = "/tab=4" element ={<Contragent data = {data} dateData = {dateData} serverActivated = {serverActivated} dateActivated = {dateActivated}
+              <Route path = "/tab=4" element ={<Contragent data = {data} dateData = {dateData} serverActivated = {serverActivated} dateActivated = {dateActivated} cref = {calRef} sref = {selectRef1}
                                                                         sumincome = {sumIncome}
                                                                         sumoutcome = {sumOutcome}
                                                                         sumloans = {sumLoan}
@@ -298,8 +319,7 @@ const App=() =>{
                                                                  sref = {selectRef1}/>}/>
               <Route path = "/tab=5" element ={<Transaction data={data}/>}/>
           </Routes> 
-          <div className = "canvas" ref = {canvasRef}>
-          </div>
+          <div className = "loader" ref = {loaderRef}></div>
       </div>
       )
     }

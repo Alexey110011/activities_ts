@@ -61,7 +61,9 @@ type newData = {
         sumloans:newData[]|undefined,
         suminvest:newData[]|undefined,
         serverActivated:boolean,
-        dateActivated:boolean
+        dateActivated:boolean,
+        cref:React.MutableRefObject<HTMLInputElement>,
+        sref:React.MutableRefObject<HTMLSelectElement> 
     }
     interface Summary1 {
         data:newData[]|undefined,
@@ -83,13 +85,15 @@ type newData = {
       }
 
 // Removes duplicates from array
-function removeDoubleNameSum(array:oldData[]) {
+function removeDoubleNameSum(array:oldData[]|newData[]|null) {
+   if(array){
     for (let i=0;i<array.length-1;i++){
         if(array[i].fullname===array[i+1].fullname){
             array[i+1].amount =array[i+1].amount + array[i].amount
             array[i].amount = 0;
         }
     }
+}
 }
 
 function removeDoubleDateSum(array:newData[]){
@@ -134,7 +138,9 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         const _someData:newData[] = structuredClone(someactivity)
         .sort((a:newData,b:newData)=> (a.fullname>b.fullname)?1:((a.fullname<b.fullname)?-1:0))
         if(!rangeDate){
-            removeDoubleNameSum(_someData)}else{removeDoubleDateSum(_someData)
+            removeDoubleNameSum(_someData)
+        }else{
+            removeDoubleDateSum(_someData)
         }
         const someData = _someData.filter(item=>item.amount!==0)
         const maxVal = getMaxValue(someData)
@@ -165,10 +171,10 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                     {someData
                     .sort((a:newData,b:newData)=>(a.amount<b.amount)?1:(a.amount>b.amount)?-1:0)//))  
                     .map((item,i)=>
-                    <li className = "" key = {i} >
+                    <li className = "activity" key = {i} >
                         <div className ="fullname">{item.fullname}</div>
                         <div className = "amount1">{item.amount}</div>
-                        <div className = "rectangler" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
+                        <div className = "rectangle" style = {{backgroundColor:`${color}`, width:`${item.amount/perPixel}px`, height:"20px"}}></div>
                     </li>)}
                </div>)
         }
@@ -191,34 +197,103 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
     } else {return null} 
 }
 
-const PersonalActivity = ({type, activity, somearray,someref, color, dateActivated}:PersonalActivity1)=>{ 
-     const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
-    if(somearray&&activity&&someref.current.value!=='') {
-       return(
-            <div>
-                <ul className={(type==="income")?"red":(type=== "outcome")?"steelblue":(type ==="loan")?"yellow":"green"}>
-                        {(somearray&&somearray.length!==0)? somearray
-                            .filter(item=>`${item.fullname}`===someref.current.value)
-                            .filter(item=>item.type===`${type}`)
-                            .sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
-                            .map((item, i)=>
-                                <li className = "showcontragent" key = {i}>
-                                   {item.date} : {item.amount}
-                                   <textarea defaultValue = {item.question} 
-                                             onMouseOver= {()=>noteRef.current.className = "comments1" } 
-                                             onClick = {()=>noteRef.current.className = "comments"} 
-                                             onMouseLeave={()=>noteRef.current.className = "comments" }
-                                             onBlur = {(e)=>updateContragent(e,item._id)}>
-                                   </textarea>
-                                            <span ref = {noteRef} className = "comments">Change note</span>
-                                </li>)
-                            :null} 
-                        </ul>
-                    </div>)
-        } else {return null}
-    }
 
-export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, suminvest, dateActivated}:Contragent1)=>{
+
+    export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}:Summary1)=> {
+
+        function getEveryAmount(array:newData[]|undefined): number|null {
+            if(array){
+                const summ = array.map(item=>(item.amount)).reduce(getSum,0)
+                console.log(summ)
+                return summ
+            } else {return null}
+        }
+    
+        const uu:(number|null)[] = [sumincome,sumoutcome, sumloans,suminvest].map(item=>getEveryAmount(item))
+            console.log(uu)
+        
+        function gmv1(array:(number|null)[]){
+            let maxVal:number|null;
+            if(array){
+                 maxVal = array.reduce((max:number|null, prop:number|null):number|null=>{
+                if(prop&&max){
+                    if(prop>max){
+                        return prop}
+                    else {
+                        return max}
+                } else if(!prop&&max){
+                    return max}
+                  else {return prop}},0)
+                return maxVal
+            }
+        }    
+       
+      const yu:number|null|undefined = gmv1(uu)
+      console.log(yu)
+         
+         const GetSummary =({someData, trans, color}:getSummary) => {
+            if(someData&&someData.length!==0&&yu){
+                const totalCount = someData.length
+                const totalAmount:number|null =someData.map((item)=>item.amount).reduce(getSum,0)
+                console.log(totalAmount)
+                return (
+                    <div className = "summaryclass">
+                        <div className = "trans">{trans}</div>
+                        <div id ="total">{totalCount}</div>
+                        <div className ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
+                        <div>{totalAmount}</div>
+                    </div>)
+            } else {
+                return (
+                    <div className = "summaryclass">
+                        <div className = "trans">{trans}</div>
+                        <div id ="total">-</div>
+                        <div className= "color" id = "amount_summ">No {trans} at this period</div>
+                        <div>No</div>
+                    </div>
+                )
+            }
+        }
+        return(
+          <div className = "component_wrapper">
+               <Date1 cref = {cref} sref  ={sref}/>
+               <div className="summaryheader"><h3>Count </h3><h4></h4><h2>Summary</h2><h3>Amount</h3></div>
+               <ul className = "summary">
+                    <li><GetSummary someData = {sumincome} trans = "income" color = "red"/></li>
+                    <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
+                    <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
+                    <li><GetSummary someData = {suminvest} trans = "investment" color ="green"/></li>
+                </ul>
+          </div>
+        )
+      }
+      const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)=>{ 
+        const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
+       if(somearray&&activity&&someref.current.value!=='') {
+          return(
+               <div className='pa'>
+                   <ul className={(type==="income")?"red":(type=== "outcome")?"steelblue":(type ==="loan")?"yellow":"green"}>
+                           {(somearray&&somearray.length!==0)? somearray
+                               .filter(item=>`${item.fullname}`===someref.current.value)
+                               .filter(item=>item.type===`${type}`)
+                               .sort((a,b)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
+                               .map((item, i)=>
+                                   <li className = "showcontragent" key = {i}>
+                                      {item.date} : {item.amount}
+                                      <textarea defaultValue = {item.question} 
+                                                onMouseOver= {()=>noteRef.current.className = "comments1" } 
+                                                onClick = {()=>noteRef.current.className = "comments"} 
+                                                onMouseLeave={()=>noteRef.current.className = "comments" }
+                                                onBlur = {(e)=>updateContragent(e,item._id)}>
+                                      </textarea>
+                                               <span ref = {noteRef} className = "comments">Change note</span>
+                                   </li>)
+                               :null} 
+                           </ul>
+                       </div>)
+           } else if(somearray&&activity&&someref.current.value==='') {return null} else {return null}
+       }
+export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, suminvest, dateActivated, cref, sref}:Contragent1)=>{
     const [sumIncome0, setSumIncome0] = useState<number|null>()
     const [sumOutcome0, setSumOutcome0] = useState<number|null>()
     const [sumLoans0, setSumLoans0] = useState<number|null>()
@@ -233,13 +308,14 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
         listRef.current.className = "list"
         }
     const n = new RegExp(reg)
-
+   
     function getPersonal(someData:newData[]|undefined,selectref:React.MutableRefObject<HTMLInputElement>):number|null{
-        return (someData&&someData.length!==0)?someData
-        .filter(item=>item.fullname === selectref.current.value)
+        console.log(selectref.current.value)
+        return (someData&&someData.length!==0)?someData.filter(item=>item.fullname === selectref.current.value)
         .map(item=>item.amount)
         .reduce(getSum,0)
         :null
+       
     }
 
     function showContragent(){
@@ -251,10 +327,15 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
         setSumOutcome0(outcomes)
         setSumLoans0(loans)
         setSumInvest0(investments)
-        listRef.current.className = "list_hidden"
+        listRef.current.className = "list_hidden" 
+        console.log(incomes, outcomes, loans, investments)
     }
 
-    if(data){
+     function cleanInput(){
+        selectRef.current.value = ''
+        showContragent()
+     }
+        if(data){
         let _someData:newData[]
         _someData = structuredClone((!dateActivated)?data:dateData).sort((a:newData,b:newData)=>(a.fullname>b.fullname)?1:((a.fullname<b.fullname)?-1:0))
         removeDoubleNameSum(_someData)
@@ -264,13 +345,13 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
             console.log(list)
             const name1 = list.filter(item=>item._id===_id)
             selectRef.current.value=name1[0].fullname
-            console.log(name1)
         }
 
-        if(!selectRef.current){
+        if(!selectRef.current||selectRef.current.value === ''){
             return (
                 <div className = "component_wrapper">
-                   <input ref = {selectRef} onChange = {changeInput}></input>
+                     <Date1 cref = {cref} sref  ={sref}/>
+                     <input ref = {selectRef} type = "search" onChange = {changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
                     <div ref = {listRef} className =  "list">
                         {list.map((item,i)=>
                         <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)}
@@ -280,7 +361,8 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
         } else {
             return (
                 <div className = "component_wrapper">
-                     <input  ref = {selectRef} onChange ={changeInput}></input>
+                        <Date1 cref = {cref} sref  ={sref}/>
+                        <input  ref = {selectRef} type = "search" onChange ={changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
                      <div ref = {listRef} className = "list">
                          {(list&&list.length!==0)
                     ?list.filter(item=>n.test(item.fullname))
@@ -301,81 +383,14 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
     } else {return null}
 } 
 
-export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}:Summary1)=> {
 
-    function getEveryAmount(array:newData[]|undefined): number|null {
-        if(array){
-            const summ = array.map(item=>(item.amount)).reduce(getSum,0)
-            console.log(summ)
-            return summ
-        } else {return null}
-    }
-
-    const uu:(number|null)[] = [sumincome,sumoutcome, sumloans,suminvest].map(item=>getEveryAmount(item))
-        console.log(uu)
-    
-    function gmv1(array:(number|null)[]){
-        let maxVal:number|null;
-        if(array){
-             maxVal = array.reduce((max:number|null, prop:number|null):number|null=>{
-            if(prop&&max){
-                if(prop>max){
-                    return prop}
-                else {
-                    return max}
-            } else if(!prop&&max){
-                return max}
-              else {return prop}},0)
-            return maxVal
-        }
-    }    
-   
-  const yu:number|any = gmv1(uu)
-  console.log(yu)
-     
-     const GetSummary =({someData, trans, color}:getSummary) => {
-        if(someData&&someData.length!==0){
-            const totalCount = someData.length
-            const totalAmount:any =someData.map((item)=>item.amount).reduce(getSum,0)
-            console.log(totalAmount)
-            return (
-                <div className = "summaryclass">
-                    <div className = "trans">{trans}</div>
-                    <div id ="total">{totalCount}</div>
-                    <div id ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
-                    <div id ="amount">{totalAmount}</div>
-                </div>)
-        } else {
-            return (
-                <div className = "summaryclass">
-                    <div className = "trans">{trans}</div>
-                    <div>-</div>
-                    <div className = "amount_summ">No {trans} at this period</div>
-                    <div className = "amount" id = "amount">No</div>
-                </div>
-            )
-        }
-    }
-    return(
-      <div className = "component_wrapper">
-           <Date1 cref = {cref} sref  ={sref}/>
-           <div className="summaryheader"><h3>Count </h3><h4> </h4><h2>Summary</h2><h3>Amount</h3></div>
-           <ul className = "summary">
-                <li><GetSummary someData = {sumincome} trans = "income" color = "red"/></li>
-                <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
-                <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
-                <li><GetSummary someData = {suminvest} trans = "investment" color ="green"/></li>
-            </ul>
-      </div>
-    )
-  }
 
 export const Transaction=({data}:Transaction1)=>{
     const lnRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const fnRef =  useRef()as React.MutableRefObject<HTMLInputElement>
     const amRef = useRef()as React.MutableRefObject<HTMLInputElement>
     const trRef = useRef() as React.MutableRefObject<HTMLSelectElement>
-    const mailRef = useRef()as React.MutableRefObject<HTMLInputElement>
+    const mailRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const numRef = useRef()as React.MutableRefObject<HTMLInputElement>
     const adRef = useRef()as React.MutableRefObject<HTMLInputElement>
     const dateRef = useRef()as React.MutableRefObject<HTMLInputElement>
@@ -391,7 +406,6 @@ export const Transaction=({data}:Transaction1)=>{
   const submit=(e:React.ChangeEvent<HTMLFormElement>)=>{
     e.preventDefault()
     createContragent()
-       
     lnRef.current.value=''
     fnRef.current.value=''
     amRef.current.value=''
@@ -421,27 +435,31 @@ export const Transaction=({data}:Transaction1)=>{
       address:adRef.current.value,
       question:adRef.current.value
       })
-  })
+    })
     .then(response => {
           return response.json()   
     })
-        .then(data => {
-          console.log(data);
-          submitRef.current.disabled = false
-        }).catch(err =>console.log(err));
+    .then(data => {
+        console.log(data);
         submitRef.current.disabled = false
+    })
+    .catch(err =>console.log(err));
     }
  
   let  lastName:newData[]|null,firstName:newData[]|null
-    const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
+ 
+ const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
       const l1 = e.target.value
       setL(l1)
+      console.log(e.target.value, lnRef.current.value, dateRef.current.value,l)
       setViewLast(true)
+      const ln= new RegExp(l1)
       if(lastName&&lastName.length!==0){
         for (let i of lastName){
           if(e.target.value===i.fullname.split(/\s/)[0]||!ln.test(i.fullname.split(/\s/)[0])){setViewLast(false)}
             }
-      }
+      }else {
+        return null}
     }
      
    const ln= new RegExp(l)
@@ -449,23 +467,22 @@ export const Transaction=({data}:Transaction1)=>{
     const firstname = (e:React.ChangeEvent<HTMLInputElement>)=>{
     const f1 = e.target.value
     const fn = new RegExp(f1)
+    setViewFirst(true)
     if(firstName&&firstName.length!==0){
       for (let i of firstName){
         if(e.target.value===i.fullname.split(/\s/)[1]||!fn.test(i.fullname.split(/\s/)[1])){setViewFirst(false)}
       }
     } 
    }
-  let lastName1:newData[]|null
-    if(data&&l){
-        lastName1 = data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))
-        if (lastName1){
-        removeDoubleNameSum(lastName1)
-        console.log(lastName1)
-        lastName = lastName1.filter(item=>item.amount!==0)} else {lastName = null}
-        const firstName1 = data.filter(item=>item.fullname.split(/\s/)[0]===lnRef.current.value).sort((a,b)=>(a.fullname.split(/]s/)[1] > b.fullname.split(/\s/)[1]) ? 1 :((b.fullname.split(/\s/)[1] > a.fullname.split(/\s/)[1]) ? -1: 0))
-        removeDoubleNameSum(firstName1)
-        firstName = firstName1.filter(item=>item.amount!==0)
-       
+   
+  const lastName1 = (data&&l)?(data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))):null
+  removeDoubleNameSum(lastName1)
+  console.log(lastName1)
+  lastName = (lastName1)?(lastName1.filter(item=>item.amount!==0)):null
+  const firstName1 = (data&&l)?data.filter(item=>item.fullname.split(/\s/)[0]===lnRef.current.value).sort((a,b)=>(a.fullname.split(/]s/)[1] > b.fullname.split(/\s/)[1]) ? 1 :((b.fullname.split(/\s/)[1] > a.fullname.split(/\s/)[1]) ? -1: 0)):null
+  removeDoubleNameSum(firstName1)
+  firstName = (firstName1)?firstName1.filter(item=>item.amount!==0):null
+
        const onClickLast = (_id:string) =>{
        const name1 = (lastName)?lastName.filter(item=>item._id===_id):[]
        lnRef.current.value = name1[0].fullname.split(/\s/)[0]
@@ -481,86 +498,54 @@ export const Transaction=({data}:Transaction1)=>{
         const name1 = (firstName)?firstName.filter(item=>item._id===_id):[]
         fnRef.current.value = name1[0].fullname.split(/\s/)[1]
         setViewFirst(false)
-        const latestData0= data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
-        .filter(item=>item.date<=dateRef.current.value)
-        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))
-        const latestData = latestData0[latestData0.length-1]
-        console.log(latestData0.length,latestData)
-        mailRef.current.value = latestData.email;
-        numRef.current.value = latestData.phone;
-        adRef.current.value = latestData.address;
+        const latestData0= (data)?data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
+        .filter(item=>(item.date<=dateRef.current.value))
+        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0)):null
+        const latestData = (latestData0)?latestData0[latestData0.length-1]:null
+        console.log(latestData0,latestData)
+        mailRef.current.value = (latestData)?latestData.email:'';
+        numRef.current.value = (latestData)?latestData.phone:'';
+        adRef.current.value = (latestData)?latestData.address:'';
         setCheckbox(true)
         setViewInfo(false)
     }
         
       return(
-        <div className = "component_wrapper form" >
+        <div className = "component_wrapper" >
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
-              <label>Transaction <span>*</span></label>
+              <label>Transaction <span>*</span>
                 <select ref ={trRef}>
                     <option>Income</option>
                     <option>Outcome</option>
                     <option>Loan</option>
                     <option>Investment</option>
-                </select>
-                <label>Date <span>*</span></label>
-                <input type='date' ref = {dateRef} required/>
-                <label>Last name <span>*</span></label>
-                <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/>
-                <ul className = {(viewLast)?"visiblement":"cached"}> {(lastName&&lastName.length!==0)?(lastName.map((item, i)=><li key = {i} onClick = {()=>onClickLast(item._id)}>{item.fullname.split(/\s/)[0]}</li>)):null}</ul>
-                <label>First name <span>*</span></label>
-                <input type='text' name='userfirstname' ref = {fnRef} onChange ={firstname} required/>
-                <ul className = {(viewFirst)?"visiblement":"cached"}>{(firstName&&firstName.length!==0)?(firstName.map((item, i)=><li key = {i} onClick = {()=>onClickFirst(item._id)}>{item.fullname.split(/\s/)[1]}</li>)):null}</ul>
-                <label>Amount <span>*</span></label>
-                <input type='number' name='amount' ref = {amRef} required/>
-                {<div className = {(!checkbox)?"cached":"visiblement_ info" }><label>Change personal data</label><input type = "checkbox"  onChange = {()=>setViewInfo(!viewInfo)}></input></div>}
+                </select></label>
+                <label>Date <span>*</span>
+                    <input type='date' ref = {dateRef} required/></label>
+                <label>Last name <span>*</span>
+                    <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/></label>
+                    <ul className = {(viewLast)?"visiblement lastname":"cached"}> {(lastName&&lastName.length!==0)?(lastName.map((item, i)=><li key = {i} onClick = {()=>onClickLast(item._id)}>{item.fullname.split(/\s/)[0]}</li>)):null}</ul>
+                    <label>First name <span>*</span>*
+                    <input type='text' name='userfirstname' ref = {fnRef} onChange ={firstname} required/></label>
+                <ul className = {(viewFirst)?"visiblement firstname":"cached"}>{(firstName&&firstName.length!==0)?(firstName.map((item, i)=><li key = {i} onClick = {()=>onClickFirst(item._id)}>{item.fullname.split(/\s/)[1]}</li>)):null}</ul>
+                <label>Amount <span>*</span>
+                <input type='number' name='amount' ref = {amRef} required/></label>
+                <div className = {(!checkbox)?"cached":"visiblement_ info"}>
+                    <label>Change personal data</label>
+                    <input type = "checkbox"  onChange = {()=>setViewInfo(!viewInfo)}/>
+                </div>
                     <div className = {(viewInfo)?"info":"noinfo"}>
-                        <label>E-mail <span>*</span></label>
-                        <input type='text' name='usermail' ref = {mailRef}/>
-                        <label>Phone <span>*</span></label>
-                        <input type='text' name='usernumber' ref = {numRef}/>
-                        <label>Address <span>*</span></label>
-                        <input type='text' name='address'ref = {adRef}/>
-                        <label>Notes</label>
-                    </div>
-                <textarea className = "text" name='question' ref = {qRef}/>
-                <input className="bot-send-mail" type='submit' value='Send' ref = {submitRef}/>
+                        <label>E-mail <span>*</span>
+                        <input type='text' name='usermail' ref = {mailRef}/></label>
+                        <label>Phone <span>*</span>
+                        <input type='text' name='usernumber' ref = {numRef}/></label>
+                        <label>Address <span>*</span>
+                        <input type='text' name='address'ref = {adRef}/></label>
+                        </div>
+                        <label>Notes
+                        <textarea className = "text" name='question' ref = {qRef}/></label>
+                        <label>
+                        <input type='submit' value='Send' ref = {submitRef}/></label>
             </form>
         </div>
-      )} else if(data){
- return (
-        <div className = "component_wrapper" >
-            <form className = "form" onSubmit ={submit} autoComplete = "off">  
-              <div> 
-                <label>Transaction <span>*</span></label>
-                <select name='transactiontype' ref ={trRef}>
-                    <option>Income</option>
-                    <option>Outcome</option>
-                    <option>Loan</option>
-                    <option>Investment</option>
-                </select>
-                <label>Date <span>*</span></label>
-                <input type='date' ref = {dateRef} required/>
-                <label>Last name <span>*</span></label>
-                <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/>
-                <label>First name <span>*</span></label>
-                <input type='text' name='userfirstname' ref = {fnRef} onChange ={firstname} required/>
-                <label>Amount <span>*</span></label>
-                <input type='number' name='amount' ref = {amRef} required/>
-                {<div className = {(!checkbox)?"cached":"visiblement_ info" }><label>Change personal data</label><input type = "checkbox"  onChange = {()=>setViewInfo(!viewInfo)}></input></div>}
-                    <div className = {(viewInfo)?"info":"noinfo"}>
-                        <label>E-mail <span>*</span></label>
-                        <input type='text' name='usermail' ref = {mailRef}/>
-                        <label>Phone <span>*</span></label>
-                        <input type='text' name='usernumber' ref = {numRef}/>
-                        <label>Address <span>*</span></label>
-                        <input type='text' name='address'ref = {adRef}/>
-                        <label>Notes</label>
-                    </div>
-                <textarea className = "text" name='question' ref = {qRef}/>
-                <input className="bot-send-mail" type='submit' value='Send'/>
-              </div>
-            </form>
-        </div>)
-    } else {return null}
-}
+      )}

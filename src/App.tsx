@@ -320,7 +320,7 @@ const App=() =>{
               <Route path = "/tab=5" element ={<Transaction data={data}/>}/>
           </Routes> 
           <div className = "loader" ref = {loaderRef}></div>
-      </div>
+        </div>
       )
     }
 

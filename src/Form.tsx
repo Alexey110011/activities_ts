@@ -167,7 +167,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
             return(
                 <div className = "component_wrapper">
                      <Date1 cref = {cref} sref  ={sref}/>
-                     <div className = "activity_info" style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
+                     <div className = "activity_info" style = {{borderBottom:`2px solid ${color}`}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.amount<b.amount)?1:(a.amount>b.amount)?-1:0)//))  
                     .map((item,i)=>
@@ -183,7 +183,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
             return(
                 <div className = "component_wrapper">
                     <Date1 cref = {cref} sref  ={sref}/>
-                    <div className = "activity_info" style = {{marginTop:"25px" ,borderBottom:`2px solid ${color}`, marginBottom:"10px"}}><h3>{type} {totalAmount}</h3></div>
+                    <div className = "activity_info" style = {{borderBottom:`2px solid ${color}`}}><h3>{type} {totalAmount}</h3></div>
                     {someData
                     .sort((a:newData,b:newData)=>(a.date>b.date)?1:(a.date<b.date)?-1:0)
                     .map((item,i)=>
@@ -239,17 +239,17 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                 return (
                     <div className = "summaryclass">
                         <div className = "trans">{trans}</div>
-                        <div id ="total">{totalCount}</div>
+                        <div className = "total">{totalCount}</div>
                         <div className ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
-                        <div>{totalAmount}</div>
+                        <div className = "amount">{totalAmount}</div>
                     </div>)
             } else {
                 return (
                     <div className = "summaryclass">
                         <div className = "trans">{trans}</div>
-                        <div id ="total">-</div>
+                        <div className ="total">-</div>
                         <div className= "color" id = "amount_summ">No {trans} at this period</div>
-                        <div>No</div>
+                        <div className = "amount">No</div>
                     </div>
                 )
             }
@@ -257,12 +257,12 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         return(
           <div className = "component_wrapper">
                <Date1 cref = {cref} sref  ={sref}/>
-               <div className="summaryheader"><h3>Count </h3><h4></h4><h2>Summary</h2><h3>Amount</h3></div>
-               <ul className = "summary">
+               <div className="summaryclass summaryheader"><h4>Count</h4><span></span><h3>Summary</h3><h4>Amount</h4></div>
+               <ul>
                     <li><GetSummary someData = {sumincome} trans = "income" color = "red"/></li>
                     <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
                     <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
-                    <li><GetSummary someData = {suminvest} trans = "investment" color ="green"/></li>
+                    <li><GetSummary someData = {suminvest} trans = "investment" color ="forestgreen"/></li>
                 </ul>
           </div>
         )
@@ -271,7 +271,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
        if(somearray&&activity&&someref.current.value!=='') {
           return(
-               <div className='pa'>
+               <div>
                    <ul className={(type==="income")?"red":(type=== "outcome")?"steelblue":(type ==="loan")?"yellow":"green"}>
                            {(somearray&&somearray.length!==0)? somearray
                                .filter(item=>`${item.fullname}`===someref.current.value)
@@ -281,7 +281,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                                    <li className = "showcontragent" key = {i}>
                                       {item.date} : {item.amount}
                                       <textarea defaultValue = {item.question} 
-                                                onMouseOver= {()=>noteRef.current.className = "comments1" } 
+                                                onMouseOver= {()=>noteRef.current.className = "info" } 
                                                 onClick = {()=>noteRef.current.className = "comments"} 
                                                 onMouseLeave={()=>noteRef.current.className = "comments" }
                                                 onBlur = {(e)=>updateContragent(e,item._id)}>
@@ -293,6 +293,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                        </div>)
            } else if(somearray&&activity&&someref.current.value==='') {return null} else {return null}
        }
+
 export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, suminvest, dateActivated, cref, sref}:Contragent1)=>{
     const [sumIncome0, setSumIncome0] = useState<number|null>()
     const [sumOutcome0, setSumOutcome0] = useState<number|null>()
@@ -327,8 +328,8 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
         setSumOutcome0(outcomes)
         setSumLoans0(loans)
         setSumInvest0(investments)
-        listRef.current.className = "list_hidden" 
-        console.log(incomes, outcomes, loans, investments)
+        if(selectRef.current.value!==''){listRef.current.className = "list_hidden"}else{listRef.current.className = "list"}
+        console.log( listRef.current.className)
     }
 
      function cleanInput(){
@@ -351,39 +352,41 @@ export const Contragent =({data, dateData,sumincome, sumoutcome, sumloans, sumin
             return (
                 <div className = "component_wrapper">
                      <Date1 cref = {cref} sref  ={sref}/>
-                     <input ref = {selectRef} type = "search" onChange = {changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
-                    <div ref = {listRef} className =  "list">
+                     <div className = "wrapper_contr">
+                        <input ref = {selectRef} type = "text" onChange = {changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
+                        <div ref = {listRef} className =  "list">
                         {list.map((item,i)=>
                         <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)}
-                        <button onClick ={showContragent}>Show</button>
+                        <button className="show"onClick ={showContragent}>Show</button>
+                    </div>
                     </div>
                 </div>)
         } else {
             return (
                 <div className = "component_wrapper">
-                        <Date1 cref = {cref} sref  ={sref}/>
-                        <input  ref = {selectRef} type = "search" onChange ={changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
+                    <Date1 cref = {cref} sref  ={sref}/>
+                    <div className = "wrapper_contr">
+                        <input  ref = {selectRef} type = "text" onChange ={changeInput}></input><button className = "hide" onClick={cleanInput}>X</button>
                      <div ref = {listRef} className = "list">
                          {(list&&list.length!==0)
-                    ?list.filter(item=>n.test(item.fullname))
-                        .map(item =>
+                         ?list.filter(item=>n.test(item.fullname))
+                              .map(item =>
                         <li className = "showcontragent" key ={item._id} onClick = {()=>sho(item._id)}>{item.fullname}</li>)
-                    :null
-                    } 
-                   <button onClick ={showContragent}>Show</button>
+                        :null
+                        } 
+                        <button className = "show" onClick ={showContragent}>Show</button>
                    </div>
                     <div className = "personal_activity">
                         <div><span>Incomes</span><PersonalActivity type = "income" activity = {sumIncome0} somearray = {sumincome} someref = {selectRef} color = "red" dateActivated = {dateActivated}/></div>
                         <div><span>Outcomes</span><PersonalActivity type = "outcome" activity = {sumOutcome0} somearray = {sumoutcome} someref = {selectRef} color = "blue" dateActivated = {dateActivated}/></div>
                         <div><span>Loan</span><PersonalActivity type = "loan" activity = {sumLoans0} somearray = {sumloans} someref = {selectRef} color = "yellow" dateActivated = {dateActivated}/></div>
-                        <div><span>Investment</span><PersonalActivity type = "investment" activity = {sumInvest0} somearray = {suminvest} someref = {selectRef} color = "green"dateActivated = {dateActivated}/></div>
+                        <div><span>Investment</span><PersonalActivity type = "investment" activity = {sumInvest0} somearray = {suminvest} someref = {selectRef} color = "lightgreen"dateActivated = {dateActivated}/></div>
+                    </div>
                     </div>
                 </div>)
                 }
     } else {return null}
 } 
-
-
 
 export const Transaction=({data}:Transaction1)=>{
     const lnRef = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -447,19 +450,20 @@ export const Transaction=({data}:Transaction1)=>{
     }
  
   let  lastName:newData[]|null,firstName:newData[]|null
- 
+  
+  
  const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
-      const l1 = e.target.value
+       const l1 = e.target.value
       setL(l1)
-      console.log(e.target.value, lnRef.current.value, dateRef.current.value,l)
-      setViewLast(true)
-      const ln= new RegExp(l1)
+      console.log(viewLast)
+     setViewLast(true)
+    
+     
       if(lastName&&lastName.length!==0){
         for (let i of lastName){
           if(e.target.value===i.fullname.split(/\s/)[0]||!ln.test(i.fullname.split(/\s/)[0])){setViewLast(false)}
             }
-      }else {
-        return null}
+      }
     }
      
    const ln= new RegExp(l)
@@ -468,12 +472,14 @@ export const Transaction=({data}:Transaction1)=>{
     const f1 = e.target.value
     const fn = new RegExp(f1)
     setViewFirst(true)
+       
     if(firstName&&firstName.length!==0){
       for (let i of firstName){
         if(e.target.value===i.fullname.split(/\s/)[1]||!fn.test(i.fullname.split(/\s/)[1])){setViewFirst(false)}
-      }
+       }
+     }
     } 
-   }
+   
    
   const lastName1 = (data&&l)?(data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))):null
   removeDoubleNameSum(lastName1)
@@ -498,11 +504,12 @@ export const Transaction=({data}:Transaction1)=>{
         const name1 = (firstName)?firstName.filter(item=>item._id===_id):[]
         fnRef.current.value = name1[0].fullname.split(/\s/)[1]
         setViewFirst(false)
-        const latestData0= (data)?data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
+
+        const latestData0= (data)?(data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
         .filter(item=>(item.date<=dateRef.current.value))
-        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0)):null
+        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))):null
         const latestData = (latestData0)?latestData0[latestData0.length-1]:null
-        console.log(latestData0,latestData)
+        console.log(data,latestData0,latestData)
         mailRef.current.value = (latestData)?latestData.email:'';
         numRef.current.value = (latestData)?latestData.phone:'';
         adRef.current.value = (latestData)?latestData.address:'';
@@ -530,9 +537,9 @@ export const Transaction=({data}:Transaction1)=>{
                 <ul className = {(viewFirst)?"visiblement firstname":"cached"}>{(firstName&&firstName.length!==0)?(firstName.map((item, i)=><li key = {i} onClick = {()=>onClickFirst(item._id)}>{item.fullname.split(/\s/)[1]}</li>)):null}</ul>
                 <label>Amount <span>*</span>
                 <input type='number' name='amount' ref = {amRef} required/></label>
-                <div className = {(!checkbox)?"cached":"visiblement_ info"}>
+                <div className = {(!checkbox)?"cached":"info"}>
                     <label>Change personal data</label>
-                    <input type = "checkbox"  onChange = {()=>setViewInfo(!viewInfo)}/>
+                    <input id ="viewinfo" type = "checkbox" onChange = {()=>setViewInfo(!viewInfo)}/>
                 </div>
                     <div className = {(viewInfo)?"info":"noinfo"}>
                         <label>E-mail <span>*</span>

@@ -110,6 +110,49 @@
       "phone": "+1 (954) 566-2476",
       "address": "457 St",
       "date":"2022-08-07"
+    },{
+      "_id": "5d99beb61851f0fadfe6bca0",
+      "amount": 50000,
+      "type": "loan",
+      "fullname": "Underwood Dianna",
+      "company": "GEOLOGIX",
+      "email": "dianna.underwood@geologix.me",
+      "phone": "+1 (831) 506-2281",
+      "address": "379 Polar Street, Derwood, Michigan, 8219",
+      "date":"2021-01-04"
+    },
+    {
+      "_id": "5d99beb61894e3a0d8a8aaeb",
+      "amount": 112045,
+      "type": "investment",
+      "fullname":"Wells Misty",
+      "company": "ZILCH",
+      "email": "misty.wells@zilch.info",
+      "phone": "+1 (803) 453-3224",
+      "address": "473 Rochester Avenue, Kraemer, Illinois, 140",
+      "date":"2022-01-31"
+    },
+    {
+      "_id": "5d99beb6b15536f75b46a608",
+      "amount": 52400,
+      "type": "investment",
+      "fullname":"Cotton Tammie",
+      "company": "GENMOM",
+      "email": "tammie.cotton@genmom.co.uk",
+      "phone": "+1 (891) 471-2924",
+      "address": "599 Juliana Place, Alafaya, Maryland, 917",
+      "date":"2022-09-09"
+    },
+    {
+      "_id": "5d99beb62fc237aa62133abc",
+      "amount": 12530,
+      "type": "income",
+      "fullname": "Rasmussen Paul",
+      "company": "SUPPORTAL",
+      "email": "rasmussen.paul@supportal.biz",
+      "phone": "+1 (829) 473-3553",
+      "address": "164 Cedar Street, Basye, District Of Columbia, 5164",
+      "date":"2022-03-07"
     }
   ]
 }

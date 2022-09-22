@@ -119,7 +119,7 @@ function getSum(total:number, number:number):number{
    return total+number}
    
 function updateContragent(e:React.ChangeEvent<HTMLTextAreaElement>,_id:string){
-     fetch('https://activities-server-db.herokuapp.com/merchants/update', {
+     fetch('https://activities-server-db.herokuapp.com/update', {
       method: "PUT",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
@@ -450,13 +450,12 @@ export const Transaction=({data}:Transaction1)=>{
     }
  
   let  lastName:newData[]|null,firstName:newData[]|null
-  
-  
- const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
+   
+    const lastname = (e:React.ChangeEvent<HTMLInputElement>) =>{
        const l1 = e.target.value
       setL(l1)
       console.log(viewLast)
-     setViewLast(true)
+      setViewLast(true)
     
      
       if(lastName&&lastName.length!==0){
@@ -464,10 +463,12 @@ export const Transaction=({data}:Transaction1)=>{
           if(e.target.value===i.fullname.split(/\s/)[0]||!ln.test(i.fullname.split(/\s/)[0])){setViewLast(false)}
             }
       }
+      
+      if(!lnRef.current.value){setViewLast(false)}
+      if(!lnRef.current.value){clearPersonalData()}
     }
      
    const ln= new RegExp(l)
-   console.log(ln)
     const firstname = (e:React.ChangeEvent<HTMLInputElement>)=>{
     const f1 = e.target.value
     const fn = new RegExp(f1)
@@ -477,13 +478,14 @@ export const Transaction=({data}:Transaction1)=>{
       for (let i of firstName){
         if(e.target.value===i.fullname.split(/\s/)[1]||!fn.test(i.fullname.split(/\s/)[1])){setViewFirst(false)}
        }
-     }
+     } 
+     if(!fnRef.current.value){setViewFirst(false)}
+     if(!fnRef.current.value){clearPersonalData()}
     } 
    
    
   const lastName1 = (data&&l)?(data.filter(item=>ln.test(item.fullname.split(/\s/)[0])).sort((a,b)=>(a.fullname.split(/\s/)[0] > b.fullname.split(/\s/)[0]) ? 1 :((b.fullname.split(/\s/)[0] < a.fullname.split(/\s/)[0]) ? -1: 0))):null
   removeDoubleNameSum(lastName1)
-  console.log(lastName1)
   lastName = (lastName1)?(lastName1.filter(item=>item.amount!==0)):null
   const firstName1 = (data&&l)?data.filter(item=>item.fullname.split(/\s/)[0]===lnRef.current.value).sort((a,b)=>(a.fullname.split(/]s/)[1] > b.fullname.split(/\s/)[1]) ? 1 :((b.fullname.split(/\s/)[1] > a.fullname.split(/\s/)[1]) ? -1: 0)):null
   removeDoubleNameSum(firstName1)
@@ -504,19 +506,26 @@ export const Transaction=({data}:Transaction1)=>{
         const name1 = (firstName)?firstName.filter(item=>item._id===_id):[]
         fnRef.current.value = name1[0].fullname.split(/\s/)[1]
         setViewFirst(false)
-
-        const latestData0= (data)?(data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
+        const dateBefore= (data)?(data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
         .filter(item=>(item.date<=dateRef.current.value))
         .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))):null
-        const latestData = (latestData0)?latestData0[latestData0.length-1]:null
-        console.log(data,latestData0,latestData)
+        const dateAfter = (data)?(data.filter(item=>(item.fullname.split(/\s/)[0]===lnRef.current.value&&item.fullname.split(/\s/)[1]===fnRef.current.value))
+        .filter(item=>(item.date>=dateRef.current.value))
+        .sort((a,b)=>(a.date>b.date)?1:((b.date>a.date)?-1:0))):null
+
+        const latestData = (dateBefore&&dateBefore.length!==0)?dateBefore[dateBefore.length-1]:(dateAfter&&dateAfter.length!==0)?dateAfter[0]:null
         mailRef.current.value = (latestData)?latestData.email:'';
         numRef.current.value = (latestData)?latestData.phone:'';
         adRef.current.value = (latestData)?latestData.address:'';
         setCheckbox(true)
         setViewInfo(false)
     }
-        
+        const clearPersonalData = ():void=>{
+        mailRef.current.value = '';
+        numRef.current.value = '';
+        adRef.current.value = '';
+        }
+
       return(
         <div className = "component_wrapper" >
             <form className = "form" onSubmit ={submit} autoComplete = "off">  
@@ -532,7 +541,7 @@ export const Transaction=({data}:Transaction1)=>{
                 <label>Last name <span>*</span>
                     <input type='text' name='userlastname' ref = {lnRef} onChange = {lastname} required/></label>
                     <ul className = {(viewLast)?"visiblement lastname":"cached"}> {(lastName&&lastName.length!==0)?(lastName.map((item, i)=><li key = {i} onClick = {()=>onClickLast(item._id)}>{item.fullname.split(/\s/)[0]}</li>)):null}</ul>
-                    <label>First name <span>*</span>*
+                    <label>First name <span>*</span>
                     <input type='text' name='userfirstname' ref = {fnRef} onChange ={firstname} required/></label>
                 <ul className = {(viewFirst)?"visiblement firstname":"cached"}>{(firstName&&firstName.length!==0)?(firstName.map((item, i)=><li key = {i} onClick = {()=>onClickFirst(item._id)}>{item.fullname.split(/\s/)[1]}</li>)):null}</ul>
                 <label>Amount <span>*</span>

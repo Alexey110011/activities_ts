@@ -45,7 +45,13 @@ code {
   padding-top:10px;
   margin:20px 0px;
 }
-
+#red{
+  color:red;
+  border-color: red;
+}
+#black {
+  color:black;
+}
 .navpanel {
   font-family:"Inter-Regular";
   display:flex;

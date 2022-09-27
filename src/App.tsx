@@ -1,7 +1,7 @@
 import './App.css';
 import {Routes, Route , Link }from 'react-router-dom';
 import dataFromFile from "./list.json"
-import { useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect} from 'react';
 import {Activity, Contragent, Summary, Transaction} from './Form'
 
 export type newData = {
@@ -76,6 +76,32 @@ const App=() =>{
     const amountRef = useRef() as React.MutableRefObject<HTMLInputElement>
     const dateRef = useRef() as React.MutableRefObject<HTMLInputElement>
 
+    const inRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    const outRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    const loanRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    const invRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    const sumRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    const contRef = useRef() as React.MutableRefObject<HTMLLIElement >
+    
+    const arr = [inRef, outRef, loanRef, invRef, contRef,sumRef]
+    
+    const handleClick =(event:React.MouseEvent<HTMLLIElement>,i:number)=>{
+       arr[i].current.style.color="red";
+       arr[i].current.style.borderColor="red"
+       for(let a=0;a<arr.length;a++){
+        if (a!==i){arr[a].current.style.color = "rgb(44, 39, 39)"
+                   arr[a].current.style.borderColor = "rgb(44,39,39"
+        }
+      }
+    }
+
+    const handleClickTransaction = (event:React.MouseEvent<HTMLLIElement>)=>{
+      for(let a=0;a<arr.length;a++){
+        arr[a].current.style.color = "rgb(44, 39, 39)"
+        arr[a].current.style.borderColor = "rgb(44,39,39"
+        }
+      }
+         
     useEffect(()=> {
       const sumIncome1 = data.filter(item=>item.type === 'income')
       const sumOutcome1  = data.filter(item=>item.type === 'outcome')
@@ -236,8 +262,7 @@ const App=() =>{
         loaderRef.current.className='loaderr'
     } 
     
-    
-    const ModalFile =({serverActivated, fileAlert}:Modal)=>{
+      const ModalFile =({serverActivated, fileAlert}:Modal)=>{
       if(!serverActivated&&!fileAlert){
         return(
             <div ref = {modalRef} className = {(!info_modal)?"alert":"alert_hidden"}>
@@ -267,13 +292,13 @@ const App=() =>{
        <div className = "tablo" onClick={getServerData}>
               <nav className = "navpanel">
                    <ul>
-                      <Link to = "/tab=0"><li>Income</li></Link>
-                      <Link to = "/tab=1"><li>Outcome</li></Link>
-                      <Link to = "/tab=2"><li>Loans</li></Link>
-                      <Link to = "/tab=3"><li>Investments</li></Link>
-                      <Link to = "/tab=4"><li>Contragents</li></Link>
-                      <Link to = "/"><li>Summary</li></Link> 
-                      <Link to = "/tab=5"><li>New transaction</li></Link>
+                      <Link to = "/tab=0"><li ref = {inRef}  onClick ={e=>handleClick(e,0)} >Income</li></Link>
+                      <Link to = "/tab=1"><li ref = {outRef} onClick ={e=>handleClick(e,1)}>Outcome</li></Link>
+                      <Link to = "/tab=2"><li ref = {loanRef} onClick ={e=>handleClick(e,2)}>Loans</li></Link>
+                      <Link to = "/tab=3"><li ref ={invRef} onClick ={e=>handleClick(e,3)}>Investments</li></Link>
+                      <Link to = "/tab=4"><li ref = {contRef} onClick ={e=>handleClick(e,4)}>Contragents</li></Link>
+                      <Link to = "/"><li ref = {sumRef} onClick ={e=>handleClick(e,5)} id = "red">Summary</li></Link> 
+                      <Link to = "/tab=5"><li onClick = {handleClickTransaction} id = "black">New transaction</li></Link>
                     </ul>
               </nav>
           </div>

@@ -37,6 +37,7 @@ code {
   max-width:750px;
   margin:5px;
   border:1px solid black;
+opacity: 0.8;  
 }
 .inner_wrapper {
   margin:0 auto
@@ -527,7 +528,120 @@ ul, textarea {
 .hide{
   border:1px solid black;
   color: red;
+}/*
+.summary_info0 {
+display:grid;
+grid-template-columns: 1fr 1fr;
+grid-template-rows: 1fr 0.5fr 1fr 1fr;
+
+}*/
+/*.welcome{width:75%;
+  background-color: #fff;
+  padding: 5px;
+  
 }
+.welcome div{
+  padding:5px 0;
+  text-align:center;
+}*/
+
+.welcome1{
+  position: absolute;
+  top:15px;
+  left:10%;
+  /*margin: 0 auto;*/
+  max-width: 500px;
+  width:90vw;
+  /*height:100vh ;*/
+  margin: 0 auto;
+  background-color: white;
+  padding: 5px;
+}
+.inwelcome div:nth-child(2){
+  border-top: 1px solid black;
+}
+
+.inwelcome{
+  border: 1px solid black;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  padding: 5px;
+  text-align:center;
+}
+.inwelcome div{
+  margin-bottom: 15px;
+}
+.summary_info1 {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-gap:5px;
+  /*width: 75%;*/
+}
+.welcome{
+  background-color: #fff;
+  padding-top: 10px;
+  width:100%;
+  text-align: left;
+  text-transform: capitalize;
+  padding-left: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  height: 150px;
+  /*display: flex;*/
+  position: relative;
+  
+ /* flex-direction: column;*/
+/* align-items:initial;*/
+}
+.welcome div {
+margin-left: 20px;
+margin-bottom: 12px;
+width:100%;
+margin-left: 0;
+text-align: left;
+padding-right: 10%;
+}
+
+.summary_info1 a{
+  text-decoration: none;
+}
+
+.seeall{
+  display: block;
+  margin-left: 25.25%;
+  margin-top: 34px;
+  width: 70%;
+  height: 23%;
+  border:none;
+  color:white;
+  border-radius: 5px;
+  font-size:15px;
+}
+.seeall.first {
+  width:30%;
+  background-color:darkgray;
+  margin:25px auto;
+  min-height: 30px;
+  height:30%
+}
+.summary_info1:nth-child(1){
+  grid-column: 1/2;
+  grid-row:1/2;
+}
+.summary_info1:nth-child(2){
+  grid-column: 1/2;
+  grid-row:2/3
+}
+.summary_info1:nth-child(3){
+  grid-column: 2/3;
+  grid-row:1/2
+}
+#summary_info:nth-child(4){
+  grid-column: 2/3;
+  grid-row:2/3
+}
+
 /*---------------------------------------------------------------------------------------------------------------*/
 @media (min-width:350px) and (max-width:384px) {
   .app_wrapper {
@@ -765,7 +879,13 @@ margin-left: 0
       visibility:hidden;;
       color:red
     }
-    
+    .summary_info1 {
+      display:grid;
+      grid-template-columns: 1fr /*1fr*/;
+      grid-template-rows: 1fr 1fr;
+      grid-gap:5px;
+      /*width: 75%;*/
+    }
  }
  /*--------------------------------------------------------------------------------------------------------------*/ 
 @media (min-width:385px) and (max-width:600px){

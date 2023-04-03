@@ -2,7 +2,7 @@ import './App.css';
 import {Routes, Route , Link }from 'react-router-dom';
 import dataFromFile from "./list.json"
 import React, { useState, useRef, useEffect} from 'react';
-import {Activity, Contragent, Summary, Transaction} from './Form'
+import {Activity, Contragent, Summary, Transaction, /*Welcome,*/ getSum} from './Form'
 
 export type newData = {
   _id: string;
@@ -26,6 +26,13 @@ export type newData = {
   serverActivated:boolean,
   fileAlert:boolean
  }
+ interface Welcome {
+  someData:newData[]|undefined,
+  trans:string,
+  color:string,
+  tab:string,
+  ref:React.MutableRefObject<HTMLDivElement>
+} 
 
   function toLocale(array:newData[]):newData[] {
     for(let i of array){
@@ -47,6 +54,43 @@ export type newData = {
     } else {return null}
   }
 
+   export const WelcomePage=({someData, trans, color,tab,ref}:Welcome)=>{
+      if(someData&&someData.length!==0){
+          const totalCount = someData.length
+          //const totalAmount:number|null =someData.map((item)=>item.amount).reduce(getSum,0)
+          //console.log(totalAmount)
+          return (
+              <div className = "welcome">
+                  <div /*className = "total"*/><b>{totalCount}</b>{/*<div>{totalAmount}</div>*/}</div>
+                  <div /*className = "trans"*/>{trans}</div>
+                  <button className = "seeall" style = {{backgroundColor:`${color}`}}>
+                    <Link to = {`/tab=${tab}`} style = {{color:"white"}}  onClick={()=>ref.current.style.color= "red"}>See all</Link>
+                  </button>
+              </div>)
+      } else {
+          return (
+              <div /*className = "welcome"*/>
+                  <div className ="total">-</div>
+                  <div className = "trans">{trans}</div>
+                  <div className= "color" id = "amount_summ">No {trans} at this period</div>
+
+                  {/*<div className = "amount">No</div>*/}
+              </div>
+          )
+      }
+  }
+  const handleClick =(arr:React.MutableRefObject<HTMLLIElement>[],/*ref:React.MutableRefObject<HTMLDivElement>,*/event:React.MouseEvent<HTMLLIElement>|React.MutableRefObject<HTMLDivElement>,i:number)=>{
+    arr[i].current.style.color="red";
+    arr[i].current.style.borderColor="red" 
+    //ref.current.style.visibility = "hidden"
+    for(let a=0;a<arr.length;a++){
+     if (a!==i){arr[a].current.style.color = "rgb(44, 39, 39)"
+                arr[a].current.style.borderColor = "rgb(44,39,39"
+     }
+   }
+  
+
+ }
 
 const App=() =>{
    
@@ -64,6 +108,7 @@ const App=() =>{
     const [info_modal,setInfo_modal] = useState(false)
     const [fileAlert, setFileAlert] = useState(false)
     const [firstAlert, setFirstAlert] = useState(false)
+    const wrapperRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const loaderRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const fileRef = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -85,15 +130,7 @@ const App=() =>{
     
     const arr = [inRef, outRef, loanRef, invRef, contRef,sumRef]
     
-    const handleClick =(event:React.MouseEvent<HTMLLIElement>,i:number)=>{
-       arr[i].current.style.color="red";
-       arr[i].current.style.borderColor="red"
-       for(let a=0;a<arr.length;a++){
-        if (a!==i){arr[a].current.style.color = "rgb(44, 39, 39)"
-                   arr[a].current.style.borderColor = "rgb(44,39,39"
-        }
-      }
-    }
+    
 
     const handleClickTransaction = (event:React.MouseEvent<HTMLLIElement>)=>{
       for(let a=0;a<arr.length;a++){
@@ -292,13 +329,13 @@ const App=() =>{
        <div className = "tablo" onClick={getServerData}>
               <nav className = "navpanel">
                    <ul>
-                      <Link to = "/tab=0"><li ref = {inRef}  onClick ={e=>handleClick(e,0)} >Income</li></Link>
-                      <Link to = "/tab=1"><li ref = {outRef} onClick ={e=>handleClick(e,1)}>Outcome</li></Link>
-                      <Link to = "/tab=2"><li ref = {loanRef} onClick ={e=>handleClick(e,2)}>Loans</li></Link>
-                      <Link to = "/tab=3"><li ref ={invRef} onClick ={e=>handleClick(e,3)}>Investments</li></Link>
-                      <Link to = "/tab=4"><li ref = {contRef} onClick ={e=>handleClick(e,4)}>Contragents</li></Link>
-                      <Link to = "/"><li ref = {sumRef} onClick ={e=>handleClick(e,5)} id = "red">Summary</li></Link> 
-                      <Link to = "/tab=5"><li onClick = {handleClickTransaction} id = "black">New transaction</li></Link>
+                      <Link to = "/tab=0"><li ref = {inRef}  onClick ={e=>handleClick(arr,e,0)} >Income</li></Link>
+                      <Link to = "/tab=1"><li ref = {outRef} onClick ={e=>handleClick(arr,e,1)}>Outcome</li></Link>
+                      <Link to = "/tab=2"><li ref = {loanRef} onClick ={e=>handleClick(arr,e,2)}>Loans</li></Link>
+                      <Link to = "/tab=3"><li ref ={invRef} onClick ={e=>handleClick(arr,e,3)}>Investments</li></Link>
+                      <Link to = "/tab=4"><li ref = {contRef} onClick ={e=>handleClick(arr,e,4)}>Contragents</li></Link>
+                      <Link to = "/tab=5"><li ref = {sumRef} onClick ={e=>handleClick(arr, e,5)} id = "red">Summary</li></Link> 
+                      <Link to = "/tab=6"><li onClick = {handleClickTransaction} id = "black">New transaction</li></Link>
                     </ul>
               </nav>
           </div>
@@ -336,17 +373,33 @@ const App=() =>{
                                                                         sumoutcome = {sumOutcome}
                                                                         sumloans = {sumLoan}
                                                                         suminvest = {sumInvest}/>}/>
-              <Route path = "/" element ={<Summary data = {data} sumincome = {sumIncome}
-                                                                 sumoutcome = {sumOutcome}
-                                                                 sumloans = {sumLoan}
-                                                                 suminvest = {sumInvest}
-                                                                 cref = {calRef} 
-                                                                 sref = {selectRef1}/>}/>
-              <Route path = "/tab=5" element ={<Transaction data={data}/>}/>
-          </Routes> 
-          <div className = "loader" ref = {loaderRef}></div>
-        </div>
-      )
+              <Route path = "/tab=5" element ={<Summary data = {data} sumincome = {sumIncome}
+                                                                      sumoutcome = {sumOutcome}
+                                                                      sumloans = {sumLoan}
+                                                                      suminvest = {sumInvest}
+                                                                      cref = {calRef} 
+                                                                      sref = {selectRef1}/>}/>
+              <Route path = "/tab=6" element ={<Transaction data={data}/>}/>
+              </Routes> 
+              <div className = "welcome1"ref = {wrapperRef}>
+                <div className='inwelcome'> 
+                    <div>
+                        <span style = {{fontSize:"20px"}}><b>Welcome</b></span>    
+                        <span style = {{display:"block"}}>With supporting text below  as a natural lead-in to additional content</span>
+                        <button className='seeall first'>All transactions</button>
+                    </div>
+                    <div>You have {data.length} transactions</div>
+                </div>
+              <div className = "summary_info1">
+              <WelcomePage someData = {sumIncome} trans = "Income" color =  "red" tab = "0" ref = 'wrapperRef'/>
+              <WelcomePage someData = {sumOutcome} trans = "Outcome" color =  "steelBlue" tab = "1" ref = 'wrapperRef' />
+              <WelcomePage someData = {sumLoan} trans = "Loan" color =  "yellow" tab = "2" ref = 'wrapperRef'/>
+              <WelcomePage someData = {sumInvest} trans = "Investment" color =  "lightgreen" tab = "3" ref = 'wrapperRef'/>
+              </div>
+  </div>
+              <div className = "loader" ref = {loaderRef}></div>
+          </div>
+     )
     }
 
   export default App;

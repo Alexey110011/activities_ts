@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react'
 import {v4} from 'uuid'
 import {Date1} from './App'
+//import {Link} from 'react-router-dom'
 
 type newData = {
     _id: string;
@@ -73,16 +74,25 @@ type newData = {
         suminvest:newData[]|undefined,
         cref:React.MutableRefObject<HTMLInputElement>,
         sref:React.MutableRefObject<HTMLSelectElement>,
+        tab?:string
     }
       interface getSummary {
         someData:newData[]|undefined,
         trans:string,
-        color:string
+        color:string,
+        //tab:string
     }
-
-      interface Transaction1 {
+  interface Transaction1 {
         data:newData[]|undefined,
       }
+      function book(){
+        fetch('https://activities-server-db.herokuapp.com')
+       .then(response=> {
+         return response.text()
+      }).then(data=>{
+       console.log(data);
+      });
+   }
 
 // Removes duplicates from array
 function removeDoubleNameSum(array:oldData[]|newData[]|null) {
@@ -115,7 +125,7 @@ function getMaxValue(array:newData[]){
 }
 
 // Getting sum of all array elements
-function getSum(total:number, number:number):number{
+export function getSum(total:number, number:number):number{
    return total+number}
    
 function updateContragent(e:React.ChangeEvent<HTMLTextAreaElement>,_id:string){
@@ -199,7 +209,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
 
 
 
-    export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref}:Summary1)=> {
+    export const Summary = ({sumincome, sumoutcome, sumloans, suminvest, cref, sref,tab}:Summary1)=> {
 
         function getEveryAmount(array:newData[]|undefined): number|null {
             if(array){
@@ -241,7 +251,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                         <div className = "trans">{trans}</div>
                         <div className = "total">{totalCount}</div>
                         <div className ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
-                        <div className = "amount">{totalAmount}</div>
+                        <div className = "amount">{totalAmount}</div><button onClick = {book}>Book</button>
                     </div>)
             } else {
                 return (
@@ -267,7 +277,56 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
           </div>
         )
       }
-      const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)=>{ 
+
+/*export const Welcome = ({data,sumincome, sumoutcome, sumloans, suminvest, cref, sref}:Summary1)=> {
+
+    const GetSummary =({someData, trans, color, tab}:Welcome) => {
+        if(someData&&someData.length!==0){
+            const totalCount = someData.length
+            const totalAmount:number|null =someData.map((item)=>item.amount).reduce(getSum,0)
+            console.log(totalAmount)
+            return (
+                <div>
+                    <div className = "total"><b>{totalCount}</b></div>
+                    <div className = "trans">{trans}</div>
+                    <button className = "seeall" style = {{backgroundColor:`${color}`}}><Link to = {`/tab=${tab}`} style = {{color:"white"}}>See all</Link></button>
+                </div>)
+        } else {
+            return (
+                <div>
+                    <div className ="total">-</div>
+                    <div className = "trans">{trans}</div>
+                    <div className= "color" id = "amount_summ">No {trans} at this period</div>
+
+                    {/*<div className = "amount">No</div>}
+                </div>
+            )
+        }
+    }
+    if(data){return(
+      <div className = /*"component_wrapper"summary_info0">
+           <Date1 cref = {cref} sref  ={sref}/>
+           <div className = "welcome">{/* summaryheader"><h4>Count</h4><span></span><h3>Summary</h3><h4>Amount</h4></div>}
+                <div className='inwelcome'> 
+                    <div>
+                        <span style = {{fontSize:"20px"}}>Welcome</span>    
+                        <span style = {{display:"block"}}>With supporting text below  as a natural lead-in to additional content</span>
+                        <button className='seeall first'>All transactions</button>
+                    </div>
+                    <div>You have {data.length} transactions</div>
+                </div>
+                <ul className = "summary_info1">
+                        <li><GetSummary someData = {sumincome} trans = "income" color = "red" tab = "0"/></li>
+                        <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue" tab = "1"/></li>
+                        <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"tab = "2"/></li>
+                        <li><GetSummary someData = {suminvest} trans = "investment" color ="lightgreen"tab = "3"/></li>
+                </ul>
+            </div>
+      </div>
+    )} else{return null}
+  }*/
+
+const PersonalActivity = ({type, activity, somearray,someref}:PersonalActivity1)=>{ 
         const noteRef = useRef() as React.MutableRefObject<HTMLInputElement>
        if(somearray&&activity&&someref.current.value!=='') {
           return(

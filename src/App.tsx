@@ -2,7 +2,7 @@ import './App.css';
 import {Routes, Route , Link }from 'react-router-dom';
 import dataFromFile from "./list.json"
 import React, { useState, useRef, useEffect} from 'react';
-import {Activity, Contragent, Summary, Transaction, /*Welcome,*/ getSum} from './Form'
+import {Activity, Contragent, Summary, Transaction, /*Welcome,getSum*/} from './Form'
 
 export type newData = {
   _id: string;
@@ -108,7 +108,7 @@ const App=() =>{
     const [info_modal,setInfo_modal] = useState(false)
     const [fileAlert, setFileAlert] = useState(false)
     const [firstAlert, setFirstAlert] = useState(false)
-    const wrapperRef = useRef() as React.MutableRefObject<HTMLDivElement>
+    //const wrapperRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const loaderRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const fileRef = useRef() as React.MutableRefObject<HTMLInputElement>

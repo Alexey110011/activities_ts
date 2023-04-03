@@ -86,7 +86,7 @@ type newData = {
         data:newData[]|undefined,
       }
       function book(){
-        fetch('https://activities-server-db.herokuapp.com')
+        fetch('https://activities-server-db.herokuapp.com/book')
        .then(response=> {
          return response.text()
       }).then(data=>{

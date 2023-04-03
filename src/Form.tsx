@@ -266,7 +266,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
         }
         return(
           <div className = "component_wrapper">
-            <button onClick = {book}>Book</button>
+            aaa<button style={{zIndex:5}}onClick = {book}>Book</button>
                <Date1 cref = {cref} sref  ={sref}/>
                <div className="summaryclass summaryheader"><h4>Count</h4><span></span><h3>Summary</h3><h4>Amount</h4></div>
                <ul>

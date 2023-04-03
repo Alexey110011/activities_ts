@@ -251,7 +251,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                         <div className = "trans">{trans}</div>
                         <div className = "total">{totalCount}</div>
                         <div className ="color" style =  {{backgroundColor:`${color}`, width:`${totalAmount/yu*320}px`, height:"20px"}}></div>
-                        <div className = "amount">{totalAmount}</div><button onClick = {book}>Book</button>
+                        <div className = "amount">{totalAmount}</div>
                     </div>)
             } else {
                 return (
@@ -273,7 +273,7 @@ export const Activity = ({someactivity, type, rangeAmount, rangeDate,color, cref
                     <li><GetSummary someData = {sumoutcome} trans = "outcome" color = "steeLBlue"/></li>
                     <li><GetSummary someData = {sumloans} trans ="loan" color = "yellow"/></li>
                     <li><GetSummary someData = {suminvest} trans = "investment" color ="forestgreen"/></li>
-                </ul>
+                </ul><button onClick = {book}>Book</button>
           </div>
         )
       }

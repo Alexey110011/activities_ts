@@ -373,7 +373,7 @@ const App=() =>{
                                                                         sumoutcome = {sumOutcome}
                                                                         sumloans = {sumLoan}
                                                                         suminvest = {sumInvest}/>}/>
-              <Route path = "/tab=5" element ={<Summary data = {data} sumincome = {sumIncome}
+              <Route path = "/" element ={<Summary data = {data} sumincome = {sumIncome}
                                                                       sumoutcome = {sumOutcome}
                                                                       sumloans = {sumLoan}
                                                                       suminvest = {sumInvest}

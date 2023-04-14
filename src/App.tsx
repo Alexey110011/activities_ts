@@ -381,7 +381,7 @@ const App=() =>{
                                                                       sref = {selectRef1}/>}/>
               <Route path = "/tab=6" element ={<Transaction data={data}/>}/>
               </Routes> 
-             {/* <div className = "welcome1"ref = {wrapperRef}>
+             <div className = "welcome1"/*ref = {wrapperRef}*/>
                 <div className='inwelcome'> 
                     <div>
                         <span style = {{fontSize:"20px"}}><b>Welcome</b></span>    
@@ -396,7 +396,7 @@ const App=() =>{
               <WelcomePage someData = {sumLoan} trans = "Loan" color =  "yellow" tab = "2" ref = 'wrapperRef'/>
               <WelcomePage someData = {sumInvest} trans = "Investment" color =  "lightgreen" tab = "3" ref = 'wrapperRef'/>
               </div>
-  </div>*/}
+  </div>
               <div className = "loader" ref = {loaderRef}></div>
           </div>
      )

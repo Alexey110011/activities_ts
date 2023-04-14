@@ -108,7 +108,7 @@ const App=() =>{
     const [info_modal,setInfo_modal] = useState(false)
     const [fileAlert, setFileAlert] = useState(false)
     const [firstAlert, setFirstAlert] = useState(false)
-    //const wrapperRef = useRef() as React.MutableRefObject<HTMLDivElement>
+    const wrapperRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const loaderRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const modalRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const fileRef = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -381,7 +381,7 @@ const App=() =>{
                                                                       sref = {selectRef1}/>}/>
               <Route path = "/tab=6" element ={<Transaction data={data}/>}/>
               </Routes> 
-             <div className = "welcome1"/*ref = {wrapperRef}*/>
+             <div className = "welcome1"ref = {wrapperRef}>
                 <div className='inwelcome'> 
                     <div>
                         <span style = {{fontSize:"20px"}}><b>Welcome</b></span>    
@@ -391,10 +391,10 @@ const App=() =>{
                     <div>You have {data.length} transactions</div>
                 </div>
               <div className = "summary_info1">
-              <WelcomePage someData = {sumIncome} trans = "Income" color =  "red" tab = "0" ref = 'wrapperRef'/>
-              <WelcomePage someData = {sumOutcome} trans = "Outcome" color =  "steelBlue" tab = "1" ref = 'wrapperRef' />
-              <WelcomePage someData = {sumLoan} trans = "Loan" color =  "yellow" tab = "2" ref = 'wrapperRef'/>
-              <WelcomePage someData = {sumInvest} trans = "Investment" color =  "lightgreen" tab = "3" ref = 'wrapperRef'/>
+              <WelcomePage someData = {sumIncome} trans = "Income" color =  "red" tab = "0" ref = {wrapperRef}/>
+              <WelcomePage someData = {sumOutcome} trans = "Outcome" color =  "steelBlue" tab = "1" ref ={wrapperRef} />
+              <WelcomePage someData = {sumLoan} trans = "Loan" color =  "yellow" tab = "2" ref = {wrapperRef}/>
+              <WelcomePage someData = {sumInvest} trans = "Investment" color =  "lightgreen" tab = "3" ref = {wrapperRef}/>
               </div>
   </div>
               <div className = "loader" ref = {loaderRef}></div>

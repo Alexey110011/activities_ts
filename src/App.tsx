@@ -334,7 +334,7 @@ const App=() =>{
                       <Link to = "/tab=2"><li ref = {loanRef} onClick ={e=>handleClick(arr,e,2)}>Loans</li></Link>
                       <Link to = "/tab=3"><li ref ={invRef} onClick ={e=>handleClick(arr,e,3)}>Investments</li></Link>
                       <Link to = "/tab=4"><li ref = {contRef} onClick ={e=>handleClick(arr,e,4)}>Contragents</li></Link>
-                      <Link to = "/tab=5"><li ref = {sumRef} onClick ={e=>handleClick(arr, e,5)} id = "red">Summary</li></Link> 
+                      <Link to = "/"><li ref = {sumRef} onClick ={e=>handleClick(arr, e,5)} id = "red">Summary</li></Link> 
                       <Link to = "/tab=6"><li onClick = {handleClickTransaction} id = "black">New transaction</li></Link>
                     </ul>
               </nav>

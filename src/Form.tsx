@@ -85,15 +85,7 @@ type newData = {
   interface Transaction1 {
         data:newData[]|undefined,
       }
-      function book(){
-        fetch('https://activities-server-db.herokuapp.com/book')
-       .then(response=> {
-         return response.text()
-      }).then(data=>{
-       console.log(data);
-      });
-   }
-
+      
 // Removes duplicates from array
 function removeDoubleNameSum(array:oldData[]|newData[]|null) {
    if(array){
@@ -621,6 +613,6 @@ export const Transaction=({data}:Transaction1)=>{
                         <textarea className = "text" name='question' ref = {qRef}/></label>
                         <label>
                         <input type='submit' value='Send' ref = {submitRef}/></label>
-            </form>aaa<button style={{zIndex:5}}onClick = {book}>Book</button>
+            </form>
         </div>
       )}
